@@ -25,6 +25,8 @@ This is the PyTorch implemention of our paper **HarmoFL: Harmonizing Local and G
 conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
 
 pip install notebook
+
+pip install medmnist
 ```
 
 ```
