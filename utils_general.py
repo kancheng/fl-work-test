@@ -220,9 +220,6 @@ def train_model_prox(model, cld_mdl_param, trn_x, trn_y, tst_x, tst_y, learning_
     return model
 
 
-
-
-
 def train_scaffold_mdl(model, model_func, state_params_diff, trn_x, trn_y, 
                     learning_rate, batch_size, n_minibatch, print_per,
                     weight_decay, dataset_name, sch_step, sch_gamma):
@@ -451,12 +448,19 @@ def train_model_FedDC(model, model_func, alpha, local_update_last, global_update
         epoch_loss = 0
         trn_gen_iter = trn_gen.__iter__()
         for i in range(int(np.ceil(n_trn/batch_size))):
+            
             batch_x, batch_y = trn_gen_iter.__next__()
+            # Test
+            # print(batch_x)
+            # print(type(batch_x))
+            # print(batch_x.size())
             batch_x = batch_x.to(device)
             batch_y = batch_y.to(device)
             
             y_pred = model(batch_x)
-            
+            # Test
+            # print(batch_x)
+            # print(y_pred)
             ## Get f_i estimate 
             loss_f_i = loss_fn(y_pred, batch_y.reshape(-1).long())
 

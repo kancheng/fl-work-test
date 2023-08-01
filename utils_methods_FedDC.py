@@ -119,18 +119,22 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
         
         if saved_itr == -1:
             avg_model = model_func().to(device)
-            avg_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())))
+            # avg_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())))
+            avg_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())), strict=False)
             
             all_model = model_func().to(device)
-            all_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())))
+            all_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())), strict=False)
+            # all_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())))
             
             cur_cld_model = model_func().to(device)
-            cur_cld_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())))
+            cur_cld_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())), strict=False)
+            # cur_cld_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())))
             cld_mdl_param = get_mdl_params([cur_cld_model], n_par)[0]
         
         else:            
             cur_cld_model = model_func().to(device)
-            cur_cld_model.load_state_dict(copy.deepcopy(dict(fed_cld.named_parameters())))
+            cur_cld_model.load_state_dict(copy.deepcopy(dict(fed_cld.named_parameters())), strict=False)
+            # cur_cld_model.load_state_dict(copy.deepcopy(dict(fed_cld.named_parameters())))
             cld_mdl_param = get_mdl_params([cur_cld_model], n_par)[0]
         
     
@@ -157,7 +161,8 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
                 trn_y = clnt_y[clnt]
                 clnt_models[clnt] = model_func().to(device)
                 model = clnt_models[clnt]
-                model.load_state_dict(copy.deepcopy(dict(cur_cld_model.named_parameters())))
+                # model.load_state_dict(copy.deepcopy(dict(cur_cld_model.named_parameters())))
+                model.load_state_dict(copy.deepcopy(dict(cur_cld_model.named_parameters())), strict=False)
                 for params in model.parameters():
                     params.requires_grad = True
                 local_update_last = state_gadient_diffs[clnt] # delta theta_i
