@@ -6,9 +6,12 @@ from scipy.stats import multivariate_normal
 from scipy.optimize import minimize
 from scipy import io
 import torch
+
 from torch.utils import data
 import torchvision
 import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+
 import torch.nn as nn
 import torch.nn.functional as F
 import copy
@@ -24,3 +27,4 @@ from sklearn import mixture
 from torchsummary import summary
 import random
 
+from torch.utils.data import DataLoader

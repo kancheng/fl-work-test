@@ -10,9 +10,16 @@ We provide code to run FedDC, FedAvg,
 
 ```
 conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+
+pip install notebook
+
+
 ```
 
 ```
+
+jupyter notebook
+
 python example_code_mnist.py
 
 python example_code_cifar10.py
@@ -31,6 +38,7 @@ python example_code_synthetic.py > example_code_synthetic_log.txt
 ```
 
 ## Prerequisite
+
 * Install the libraries listed in requirements.txt
     ```
     pip install -r requirements.txt
@@ -38,8 +46,6 @@ python example_code_synthetic.py > example_code_synthetic_log.txt
 
 ## Datasets preparation
 **We give datasets for the benchmark, including CIFAR10, CIFAR100, MNIST, EMNIST-L and the synthetic dataset.**
-
-
 
 
 You can obtain the datasets when you first time run the code on CIFAR10, CIFAR100, MNIST, synthetic datasets.
