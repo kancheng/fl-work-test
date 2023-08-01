@@ -9,37 +9,10 @@ from utils_methods_FedDC import train_FedDC
 # Dataset initialization
 data_path = 'Folder/' # The folder to save Data & Model
 
-########
-# For 'CIFAR100' experiments
-#     - Change the dataset argument from CIFAR10 to CIFAR100.
-########
-# For 'mnist' experiments
-#     - Change the dataset argument from CIFAR10 to mnist.
-########
-# For 'emnist' experiments
-#     - Download emnist dataset from (https://www.nist.gov/itl/products-and-services/emnist-dataset) as matlab format and unzip it in data_path + "Data/Raw/" folder.
-#     - Change the dataset argument from CIFAR10 to emnist.
-########
-#      - In non-IID use
-# name = 'shakepeare_nonIID'
-# data_obj = ShakespeareObjectCrop_noniid(storage_path, name, crop_amount = 2000)
-#########
-
-
 n_client = 100
-# Generate IID or Dirichlet distribution
-# IID
+
 data_obj = ExternalDatasetObject(dataset='medical-mnist', n_client=n_client, seed=23, rule='iid', unbalanced_sgm=0, data_path=data_path)
 
-# data_obj = DatasetObject(dataset='medical-mnist', n_client=n_client, seed=23, rule='iid', unbalanced_sgm=0, data_path=data_path)
-
-# unbalanced
-#data_obj = DatasetObject(dataset='medical-mnist', n_client=n_client, seed=23, rule='iid', unbalanced_sgm=0.3, data_path=data_path)
-
-# Dirichlet (0.6)
-# data_obj = DatasetObject(dataset='medical-mnist', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.6, data_path=data_path)
-# Dirichlet (0.3)
-# data_obj = DatasetObject(dataset='medical-mnist', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.3, data_path=data_path)
 
 model_name = 'cifar10_LeNet' # Model type
 

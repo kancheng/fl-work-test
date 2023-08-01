@@ -69,8 +69,13 @@ class client_model(nn.Module):
             resnet18.layer4[1].bn1 = nn.GroupNorm(num_groups = 2, num_channels = 512)
             resnet18.layer4[1].bn2 = nn.GroupNorm(num_groups = 2, num_channels = 512)
 
+         ###################
+         ### Testing !!! ###
+         ###################
+
+
             assert len(dict(resnet18.named_parameters()).keys()) == len(resnet18.state_dict().keys()), 'More BN layers are there...'
-            
+  
             self.model = resnet18
 
 
