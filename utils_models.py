@@ -69,15 +69,9 @@ class client_model(nn.Module):
             resnet18.layer4[1].bn1 = nn.GroupNorm(num_groups = 2, num_channels = 512)
             resnet18.layer4[1].bn2 = nn.GroupNorm(num_groups = 2, num_channels = 512)
 
-         ###################
-         ### Testing !!! ###
-         ###################
-
-
             assert len(dict(resnet18.named_parameters()).keys()) == len(resnet18.state_dict().keys()), 'More BN layers are there...'
   
             self.model = resnet18
-
 
         if self.name == 'shakes_LSTM':
             embedding_dim = 8
@@ -89,8 +83,12 @@ class client_model(nn.Module):
             self.embedding = nn.Embedding(input_length, embedding_dim)
             self.stacked_LSTM = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_LSTM)
             self.fc = nn.Linear(hidden_size, self.n_cls)
-              
-        
+
+         ###################
+         ### Testing !!! ###
+         ###################
+
+  
     def forward(self, x):
         if self.name == 'Linear':
             x = self.fc(x)
@@ -133,6 +131,12 @@ class client_model(nn.Module):
             # Choose last hidden layer
             last_hidden = output[-1,:,:]
             x = self.fc(last_hidden)
+
+
+         ###################
+         ### Testing !!! ###
+         ###################
+
 
         return x
     
