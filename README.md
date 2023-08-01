@@ -37,6 +37,15 @@ python example_code_cifar100.py > example_code_cifar100_log.txt
 python example_code_synthetic.py > example_code_synthetic_log.txt
 ```
 
+
+**Build cython file**
+
+build cython file for amplitude normalization
+```bash
+python utils/setup.py build_ext --inplace
+```
+
+
 ## Prerequisite
 
 * Install the libraries listed in requirements.txt
