@@ -32,3 +32,4 @@ import random
 ###################
 
 from torch.utils.data import DataLoader
+from PIL import Image

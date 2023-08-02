@@ -1,5 +1,19 @@
 from utils_libs import *
 
+def keep_same_size_file(path, size=(256, 256)):
+    img = Image.open(path)
+    max_size = max(img.width, img.height)
+    mask = Image.new('RGB', (max_size, max_size), (0, 0, 0))
+    mask.paste(img, (0, 0))
+    mask = mask.resize(size)
+    return mask
+def keep_same_size_obj(obj, size=(256, 256)):
+    max_size = max(obj.width, obj.height)
+    mask = Image.new('RGB', (max_size, max_size), (0, 0, 0))
+    mask.paste(obj, (0, 0))
+    mask = mask.resize(size)
+    return mask
+
 class DatasetObject:
     def __init__(self, dataset, n_client, seed, rule, unbalanced_sgm=0, rule_arg='', data_path=''):
         self.dataset  = dataset
@@ -570,14 +584,27 @@ class Dataset(torch.utils.data.Dataset):
         return len(self.X_data)
 
     def __getitem__(self, idx):
-        if self.name == 'mnist' or self.name == 'synt' or self.name == 'emnist':
+        if self.name == 'mnist':
+            X = keep_same_size_obj(self.X_data[idx, :])
+            if isinstance(self.y_data, bool):
+                return X
+            else:
+                y = keep_same_size_obj(self.y_data[idx])
+                return X, y
+        elif self.name == 'synt' or self.name == 'emnist':
             X = self.X_data[idx, :]
             if isinstance(self.y_data, bool):
                 return X
             else:
                 y = self.y_data[idx]
                 return X, y
-        
+        # if self.name == 'mnist' or self.name == 'synt' or self.name == 'emnist':
+        #     X = self.X_data[idx, :]
+        #     if isinstance(self.y_data, bool):
+        #         return X
+        #     else:
+        #         y = self.y_data[idx]
+        #         return X, y
         elif self.name == 'CIFAR10' or self.name == 'CIFAR100':
             img = self.X_data[idx]
             if self.train:
