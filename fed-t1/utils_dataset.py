@@ -599,8 +599,8 @@ class Dataset(torch.utils.data.Dataset):
             else:
                 y = keep_same_size_obj(self.y_data[idx])
                 # y = self.y_data[idx]
-                # return X, y
-                return transforms(X), transforms(y)
+                return X, y
+                # return transforms(X), transforms(y)
         elif self.name == 'synt' or self.name == 'emnist':
             X = self.X_data[idx, :]
             if isinstance(self.y_data, bool):

@@ -453,9 +453,12 @@ def train_model_FedDC(model, model_func, alpha, local_update_last, global_update
             
             batch_x, batch_y = trn_gen_iter.__next__()
             # Test
-            # print(batch_x)
-            # print(type(batch_x))
-            # print(batch_x.size())
+            print(batch_x)
+            print(type(batch_x))
+            print(batch_x.size())
+            print(batch_y)
+            print(type(batch_y))
+            print(batch_y.size())
             batch_x = batch_x.to(device)
             batch_y = batch_y.to(device)
             
