@@ -2,7 +2,7 @@ from utils_general import *
 from utils_methods import *
 
 from utils_methods_FedDC import train_FedDC
-
+from nets.models import *
 # Dataset initialization
 data_path = 'Folder/' # The folder to save Data & Model
 
@@ -54,8 +54,8 @@ suffix = model_name
 lr_decay_per_round = 0.998
 
 # Model function
-model_func = lambda : client_model(model_name)
-# model_func = UNet()
+# model_func = lambda : client_model(model_name)
+model_func = lambda : UNet
 init_model = model_func()
 
 
