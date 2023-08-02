@@ -217,10 +217,14 @@ class DatasetObject:
                     clnt_x[clnt_idx_] = trn_x[clnt_data_list_cum_sum[clnt_idx_]:clnt_data_list_cum_sum[clnt_idx_+1]]
                     clnt_y[clnt_idx_] = trn_y[clnt_data_list_cum_sum[clnt_idx_]:clnt_data_list_cum_sum[clnt_idx_+1]]
                 
-                clnt_x = np.asarray(clnt_x)
-                clnt_y = np.asarray(clnt_y)
-                # clnt_x = np.asarray(clnt_x, dtype=object)
-                # clnt_y = np.asarray(clnt_y, dtype=object)
+                # clnt_x = np.asarray(clnt_x)
+                # clnt_y = np.asarray(clnt_y)
+                if self.dataset == 'CIFAR10':
+                    clnt_x = np.asarray(clnt_x, dtype=object)
+                    clnt_y = np.asarray(clnt_y, dtype=object)
+                else:
+                    clnt_x = np.asarray(clnt_x)
+                    clnt_y = np.asarray(clnt_y)
 
             
             self.clnt_x = clnt_x; self.clnt_y = clnt_y
