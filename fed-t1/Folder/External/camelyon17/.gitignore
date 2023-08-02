@@ -1,0 +1,5 @@
+patches/
+camelyon17_*.tar.gz
+*.txt
+*.pkl
+*.csv
