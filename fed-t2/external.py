@@ -1,3 +1,6 @@
+################
+####  TEST  ####
+################
 import externalconfig
 # 外部資料測試
 import torch
