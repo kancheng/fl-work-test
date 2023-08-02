@@ -35,6 +35,7 @@ data_path = 'Folder/' # The folder to save Data & Model
 # IID
 n_client = 100
 data_obj = DatasetObject(dataset='mnist', n_client=n_client, seed=23, rule='iid', unbalanced_sgm=0, data_path=data_path)
+# data_obj = DatasetObject(dataset='CIFAR10', n_client=n_client, seed=23, rule='iid', unbalanced_sgm=0, data_path=data_path)
 
 # Dirichlet (0.6)
 # data_obj = DatasetObject(dataset='CIFAR10', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.6, data_path=data_path)
@@ -67,12 +68,15 @@ if not os.path.exists('%sModel/%s/%s_test_init_mdl.pt' %(data_path, data_obj.nam
     if not os.path.exists('%sModel/%s/' %(data_path, data_obj.name)):
         print("Create a new directory")
         os.mkdir('%sModel/%s/' %(data_path, data_obj.name))
-    torch.save(init_model.state_dict(), '%sModel/%s/%s_test_init_mdl.pt' %(data_path, data_obj.name, model_name))
+    torch.save(init_model.state_dict(), '%sModel/%s/%s_test_init_mdl.pt' %(data_path, data_obj.name, model_name), strict=False)
+    # torch.save(init_model.state_dict(), '%sModel/%s/%s_test_init_mdl.pt' %(data_path, data_obj.name, model_name))
 else:
     # Load model
-    init_model.load_state_dict(torch.load('%sModel/%s/%s_test_init_mdl.pt' %(data_path, data_obj.name, model_name)))    
+    init_model.load_state_dict(torch.load('%sModel/%s/%s_test_init_mdl.pt' %(data_path, data_obj.name, model_name)), strict=False)
+    # init_model.load_state_dict(torch.load('%sModel/%s/%s_test_init_mdl.pt' %(data_path, data_obj.name, model_name)))
     
-
+# https://towardsdatascience.com/understanding-u-net-61276b10f360
+# https://github.com/milesial/Pytorch-UNet/
 
 # # ####
 print('FedDC')
