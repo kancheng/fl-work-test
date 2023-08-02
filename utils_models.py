@@ -173,7 +173,8 @@ class client_model(nn.Module):
          ###################
 
         if self.name == 'mnist_UNet':
-            e1 = self.layer1(input) # 64,128,128
+            # e1 = self.layer1(input) # 64,128,128
+            e1 = self.layer1(x) # 64,128,128
             e2 = self.layer2(e1) # 64,64,64
             e3 = self.layer3(e2) # 128,32,32
             e4 = self.layer4(e3) # 256,16,16

@@ -54,8 +54,8 @@ suffix = model_name
 lr_decay_per_round = 0.998
 
 # Model function
-# model_func = lambda : client_model(model_name)
-model_func = lambda : UNet
+model_func = lambda : client_model(model_name)
+# model_func = lambda : UNet
 init_model = model_func()
 
 
