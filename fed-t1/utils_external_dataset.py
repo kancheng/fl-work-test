@@ -15,6 +15,11 @@ MED_MNIST_IMAGE_SIZE = external_config.MED_MNIST_IMAGE_SIZE
 MED_MNIST_BATCH_SIZE = external_config.MED_MNIST_BATCH_SIZE
 MED_MNIST_NUM_WORKERS = external_config.MED_MNIST_NUM_WORKERS
 
+# salt
+SALT_TRAIN_IMAGE_DIR = external_config.SALT_TRAIN_IMAGE_DIR
+SALT_TRAIN_MASK_DIR = external_config.SALT_TRAIN_MASK_DIR
+SALT_TEST_IMAGE_DIR = external_config.SALT_TEST_IMAGE_DIR
+
 # setting val.
 
 TRAIN_DIR = MED_MNIST_TRAIN_DIR
@@ -23,6 +28,8 @@ VALID_DIR = MED_MNIST_VALID_DIR
 IMAGE_SIZE = MED_MNIST_IMAGE_SIZE
 BATCH_SIZE = MED_MNIST_BATCH_SIZE
 NUM_WORKERS = MED_MNIST_NUM_WORKERS
+
+
 
 # Training transforms
 def get_train_transform(IMAGE_SIZE):
@@ -222,7 +229,13 @@ class ExternalDatasetObject:
 
             # if self.dataset == 'prostate':
             #     print('test mes prostate.')
-
+            if self.dataset == 'salt':
+                print('test mes salt.')
+                trn_load, tst_load = load_external_data(EDIR)
+                trn_load = torch.utils.data.DataLoader(trnset, batch_size=60000, shuffle=False, num_workers=1)
+                tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=1)
+                self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 1;
+            
             # Shuffle Data
             np.random.seed(self.seed)
             rand_perm = np.random.permutation(len(trn_y))

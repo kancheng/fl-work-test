@@ -33,4 +33,9 @@ OASIS1_DIR = 'Folder/External/oasis1'
 # 6 - prostate
 PROSTATE_DIR = 'Folder/External/prostate'
 
+# 7 - salt
+SALT_TRAIN_IMAGE_DIR = 'Folder/External/salt/train/images'
+SALT_TRAIN_MASK_DIR = 'Folder/External/salt/train/masks'
+SALT_TEST_IMAGE_DIR = 'Folder/External/salt/test/images'
+
 
