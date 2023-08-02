@@ -14,6 +14,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from torch.utils.tensorboard import SummaryWriter
 
+## get_lr() -> `get_last_lr()`
+
 import time
 max_norm = 10
 # --- Evaluate a NN model
@@ -96,10 +98,10 @@ def train_model(model, trn_x, trn_y, tst_x, tst_y, learning_rate, batch_size, ep
     if print_test:
         loss_tst, acc_tst = get_acc_loss(tst_x, tst_y, model, dataset_name, 0)
         print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, Test Accuracy: %.4f, Loss: %.4f, LR: %.4f" 
-              %(0, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_lr()[0]))
+              %(0, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_last_lr()[0]))
     else:
         print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, LR: %.4f" 
-              %(0, acc_trn, loss_trn, scheduler.get_lr()[0]))
+              %(0, acc_trn, loss_trn, scheduler.get_last_lr()[0]))
     
     model.train()
     
@@ -129,9 +131,9 @@ def train_model(model, trn_x, trn_y, tst_x, tst_y, learning_rate, batch_size, ep
             if print_test:
                 loss_tst, acc_tst = get_acc_loss(tst_x, tst_y, model, dataset_name, 0)
                 print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, Test Accuracy: %.4f, Loss: %.4f, LR: %.4f" 
-                      %(e+1, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_lr()[0]))
+                      %(e+1, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_last_lr()[0]))
             else:
-                print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, LR: %.4f" %(e+1, acc_trn, loss_trn, scheduler.get_lr()[0]))
+                print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, LR: %.4f" %(e+1, acc_trn, loss_trn, scheduler.get_last_lr()[0]))
     
             
             model.train()
@@ -162,10 +164,10 @@ def train_model_prox(model, cld_mdl_param, trn_x, trn_y, tst_x, tst_y, learning_
     if print_test:
         loss_tst, acc_tst = get_acc_loss(tst_x, tst_y, model, dataset_name, 0)
         print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, Test Accuracy: %.4f, Loss: %.4f, LR: %.4f" 
-              %(0, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_lr()[0]))
+              %(0, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_last_lr()[0]))
     else:
         print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, LR: %.4f" 
-              %(0, acc_trn, loss_trn, scheduler.get_lr()[0]))
+              %(0, acc_trn, loss_trn, scheduler.get_last_lr()[0]))
     
     model.train()
     
@@ -204,9 +206,9 @@ def train_model_prox(model, cld_mdl_param, trn_x, trn_y, tst_x, tst_y, learning_
             if print_test:
                 loss_tst, acc_tst = get_acc_loss(tst_x, tst_y, model, dataset_name, 0)
                 print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, Test Accuracy: %.4f, Loss: %.4f, LR: %.4f" 
-                      %(e+1, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_lr()[0]))
+                      %(e+1, acc_trn, loss_trn, acc_tst, loss_tst, scheduler.get_last_lr()[0]))
             else:
-                print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, LR: %.4f" %(e+1, acc_trn, loss_trn, scheduler.get_lr()[0]))
+                print("Epoch %3d, Training Accuracy: %.4f, Loss: %.4f, LR: %.4f" %(e+1, acc_trn, loss_trn, scheduler.get_last_lr()[0]))
     
             
             model.train()
@@ -298,7 +300,7 @@ def train_scaffold_mdl(model, model_func, state_params_diff, trn_x, trn_y,
                     step_loss += (weight_decay)/2 * np.sum(params * params)
 
                 print("Step %3d, Training Loss: %.4f, LR: %.5f"
-                      %(count_step, step_loss, scheduler.get_lr()[0]))
+                      %(count_step, step_loss, scheduler.get_last_lr()[0]))
                 step_loss = 0; n_data_step = 0
             
             model.train()
@@ -406,7 +408,7 @@ def train_model_alg(model, model_func, alpha_coef, avg_mdl_param, hist_params_di
                 epoch_loss += (alpha_coef+weight_decay)/2 * np.sum(params * params)
             
             print("Epoch %3d, Training Loss: %.4f, LR: %.5f"
-                  %(e+1, epoch_loss, scheduler.get_lr()[0]))
+                  %(e+1, epoch_loss, scheduler.get_last_lr()[0]))
             
             
             model.train()
@@ -494,7 +496,7 @@ def train_model_FedDC(model, model_func, alpha, local_update_last, global_update
                 epoch_loss += (weight_decay)/2 * np.sum(params * params)
             
             print("Epoch %3d, Training Loss: %.4f, LR: %.5f"
-                  %(e+1, epoch_loss, scheduler.get_lr()[0]))
+                  %(e+1, epoch_loss, scheduler.get_last_lr()[0]))
             
             
             model.train()
