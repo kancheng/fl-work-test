@@ -122,7 +122,6 @@ class Up(nn.Module):
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
 
-
 class OutConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(OutConv, self).__init__()
@@ -130,7 +129,9 @@ class OutConv(nn.Module):
 
     def forward(self, x):
         return self.conv(x)
-    
+
+#####
+
 class client_model(nn.Module):
     def __init__(self, name, args=True):
         super(client_model, self).__init__()
@@ -217,6 +218,7 @@ class client_model(nn.Module):
          ###################
          ### Testing !!! ###
          ###################
+
         if self.name == 'mnist_UNet':
             self.n_cls = 10
             # self.base_model = torchvision.models.resnet18(True)
@@ -290,6 +292,27 @@ class client_model(nn.Module):
             # n_channels=3 for RGB images
             # n_classes is the number of probabilities you want to get per pixel
 
+        if self.name == 'medical-mnist_MedicalMNISTCNN':
+            self.conv_block = nn.Sequential(
+                nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2)
+            )
+
+            self.classifier = nn.Sequential(
+                nn.Linear(in_features=256, out_features=128),
+                nn.Dropout2d(p=0.4),
+                nn.Linear(in_features=128, out_features=num_classes)
+            )
 
     def forward(self, x):
         if self.name == 'Linear':
@@ -337,6 +360,15 @@ class client_model(nn.Module):
          ###################
          ### Testing !!! ###
          ###################
+
+#####
+
+        if self.name == 'medical-mnist_MedicalMNISTCNN':
+            x = self.conv_block(x)
+            bs, _, _, _ = x.shape
+            x = F.adaptive_avg_pool2d(x, 1).reshape(bs, -1)
+            x = self.classifier(x)
+#####
 
         if self.name == 'mnist_UNet':
             # # e1 = self.layer1(input) # 64,128,128
