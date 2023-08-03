@@ -62,6 +62,8 @@ if __name__ == '__main__':
         net_glob = CNNCifar100(args=args).to(args.device)
     elif args.model == 'cnn' and args.dataset == 'mnist':
         net_glob = CNNMnist(args=args).to(args.device)
+    elif args.model == '2nn' and args.dataset == 'mnist':
+        net_glob = Mnist_2NN(args=args).to(args.device)
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:

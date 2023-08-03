@@ -102,6 +102,10 @@ python main_fed.py --dataset cifar100 --iid --num_channels 3 --model mlp --epoch
 python main_nn.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 5 --gpu 0 --num_classes 100
 
 python main_nn.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 5 --gpu 0 --num_classes 100
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 10 --gpu 0  
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 10 --gpu 0 --all_clients
 ```
 
 

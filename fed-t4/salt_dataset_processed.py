@@ -2,7 +2,32 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.10
 
+# Library
+
 from libs import *
+
+# Configs
+
+train_image_dir = 'external/salt/train/images'
+train_mask_dir = 'external/salt/train/masks'
+test_image_dir = 'external/salt/test/images'
+
+# Split
+
+depths = pd.read_csv('external/salt/depths.csv')
+depths.sort_values('z', inplace=True)
+depths.drop('z', axis=1, inplace=True)
+depths['fold'] = (list(range(0,5)) * depths.shape[0])[:depths.shape[0]]
+
+train_df = pd.read_csv('external/salt/train.csv')
+train_df = train_df.merge(depths)
+dist = []
+for id in train_df.id.values:
+  img = cv2.imread(f'external/salt/images/{id}.png', cv2.IMREAD_GRAYSCALE)
+  dist.append(np.unique(img).shape[0])
+train_df['unique_pixels'] = dist
+
+# Dataset
 
 def trainImageFetch(images_id):
     image_train = np.zeros((images_id.shape[0], 101, 101), dtype=np.float32)

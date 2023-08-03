@@ -136,3 +136,17 @@ class UNet(nn.Module):
         x = self.conv_last(d0) # 1,256,256
         return x
 
+class Mnist_2NN(nn.Module):
+    def __init__(self, args):
+        super().__init__()
+        # Classes 10
+        self.fc1 = nn.Linear(1 * 28 * 28, 200)
+        self.fc2 = nn.Linear(200, 200)
+        self.fc3 = nn.Linear(200, args.num_classes)
+
+    def forward(self, x):
+        x = x.view(-1, 1 * 28 * 28)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x

@@ -51,7 +51,7 @@ def mnist_noniid(dataset, num_users):
 
 def cifar_iid(dataset, num_users):
     """
-    Sample I.I.D. client data from CIFAR10 dataset
+    Sample I.I.D. client data from CIFAR10 &  CIFAR100 dataset
     :param dataset:
     :param num_users:
     :return: dict of image index

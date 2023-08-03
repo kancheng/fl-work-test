@@ -38,6 +38,9 @@ if __name__ == '__main__':
             dict_users = cifar_iid(dataset_train, args.num_users)
         else:
             exit('Error: only consider IID setting in CIFAR100')
+    # elif args.dataset == 'salt':
+    #     trans_salt = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        
     else:
         exit('Error: unrecognized dataset')
     img_size = dataset_train[0][0].shape
@@ -49,6 +52,8 @@ if __name__ == '__main__':
         net_glob = CNNCifar100(args=args).to(args.device)
     elif args.model == 'cnn' and args.dataset == 'mnist':
         net_glob = CNNMnist(args=args).to(args.device)
+    elif args.model == '2nn' and args.dataset == 'mnist':
+        net_glob = Mnist_2NN(args=args).to(args.device)
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:

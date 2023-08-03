@@ -2,6 +2,14 @@
 
 > Python 版本改為 3.10; PyTorch 版本為 2.0
 
+## Fixed
+
+- https://github.com/IBM/probabilistic-federated-neural-matching
+
+- https://github.com/TsingZ0/PFL-Non-IID/blob/master/dataset/utils/dataset_utils.py
+
+## Raw Proj.
+
 ```
 ├── data
 ├── log
