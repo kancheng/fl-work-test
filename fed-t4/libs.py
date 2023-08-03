@@ -10,10 +10,10 @@ import numpy as np
 from torchvision import datasets, transforms
 import torch
 
-from utils.sampling import mnist_iid, mnist_noniid, cifar_iid
+from utils.sampling import mnist_iid, mnist_noniid, cifar_iid, emnist_iid
 from utils.options import args_parser
 from models.Update import LocalUpdate
-from models.Nets import MLP, CNNMnist, CNNCifar, CNNCifar100, Mnist_2NN, UNet
+from models.Nets import MLP, CNNMnist, CNNCifar, CNNCifar100, Mnist_2NN, UNet, Emnist_NN
 from models.Fed import FedAvg
 from models.test import test_img
 

@@ -17,6 +17,9 @@ def args_parser():
     parser.add_argument('--momentum', type=float, default=0.5, help="SGD momentum (default: 0.5)")
     parser.add_argument('--split', type=str, default='user', help="train-test split type, user or sample")
 
+    # methods
+    parser.add_argument('--methods', type=str, default='fedavg', help='methods name')
+
     # model arguments
     parser.add_argument('--model', type=str, default='mlp', help='model name')
     parser.add_argument('--kernel_num', type=int, default=9, help='number of each kind of kernel')

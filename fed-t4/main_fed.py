@@ -3,6 +3,7 @@
 # Python version: 3.10
 
 from libs import *
+# from salt_dataset_processed import *
 
 if __name__ == '__main__':
     # parse args
@@ -19,6 +20,14 @@ if __name__ == '__main__':
             dict_users = mnist_iid(dataset_train, args.num_users)
         else:
             dict_users = mnist_noniid(dataset_train, args.num_users)
+    if args.dataset == 'emnist':
+        trans_emnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
+        dataset_train = datasets.EMNIST('./data/emnist/', split = 'digits', train=True, download=True, transform=trans_emnist)
+        dataset_test = datasets.EMNIST('./data/emnist/', split = 'digits', train=False, download=True, transform=trans_emnist)
+        if args.iid:
+            dict_users = emnist_iid(dataset_train, args.num_users)
+        else:
+             exit('Error: only consider IID setting in EMNIST')
     elif args.dataset == 'cifar':
         trans_cifar = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR10('./data/cifar', train=True, download=True, transform=trans_cifar)
@@ -38,8 +47,8 @@ if __name__ == '__main__':
             dict_users = cifar_iid(dataset_train, args.num_users)
         else:
             exit('Error: only consider IID setting in CIFAR100')
-    # elif args.dataset == 'salt':
-    #     trans_salt = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    elif args.dataset == 'salt':
+        trans_salt = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         
     else:
         exit('Error: unrecognized dataset')
@@ -54,6 +63,8 @@ if __name__ == '__main__':
         net_glob = CNNMnist(args=args).to(args.device)
     elif args.model == '2nn' and args.dataset == 'mnist':
         net_glob = Mnist_2NN(args=args).to(args.device)
+    elif args.model == 'nn' and args.dataset == 'emnist':
+        net_glob = Emnist_NN(args=args).to(args.device)
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:
@@ -78,36 +89,41 @@ if __name__ == '__main__':
     if args.all_clients: 
         print("Aggregation over all clients")
         w_locals = [w_glob for i in range(args.num_users)]
-    for iter in range(args.epochs):
-        loss_locals = []
-        if not args.all_clients:
-            w_locals = []
-        m = max(int(args.frac * args.num_users), 1)
-        idxs_users = np.random.choice(range(args.num_users), m, replace=False)
-        for idx in idxs_users:
-            local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-            w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-            if args.all_clients:
-                w_locals[idx] = copy.deepcopy(w)
-            else:
-                w_locals.append(copy.deepcopy(w))
-            loss_locals.append(copy.deepcopy(loss))
-        # update global weights
-        w_glob = FedAvg(w_locals)
+    # Mutli. Fed.    
+    if args.methods == 'fedavg':
+        for iter in range(args.epochs):
+            loss_locals = []
+            if not args.all_clients:
+                w_locals = []
+            m = max(int(args.frac * args.num_users), 1)
+            idxs_users = np.random.choice(range(args.num_users), m, replace=False)
+            for idx in idxs_users:
+                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
+                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                if args.all_clients:
+                    w_locals[idx] = copy.deepcopy(w)
+                else:
+                    w_locals.append(copy.deepcopy(w))
+                loss_locals.append(copy.deepcopy(loss))
+            # update global weights
 
-        # copy weight to net_glob
-        net_glob.load_state_dict(w_glob)
+            w_glob = FedAvg(w_locals)
+            
+            # copy weight to net_glob
+            net_glob.load_state_dict(w_glob)
 
-        # print loss
-        loss_avg = sum(loss_locals) / len(loss_locals)
-        print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
-        loss_train.append(loss_avg)
+            # print loss
+            loss_avg = sum(loss_locals) / len(loss_locals)
+            print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
+            loss_train.append(loss_avg)
+    # elif args.methods == 'harmofl':
+    #     print('Testing ...')
 
     # plot loss curve
     plt.figure()
     plt.plot(range(len(loss_train)), loss_train)
     plt.ylabel('train_loss')
-    plt.savefig('./save/fed_{}_{}_{}_C{}_iid{}.png'.format(args.dataset, args.model, args.epochs, args.frac, args.iid))
+    plt.savefig('./save/fed_{}_{}_{}_C{}_iid{}_{}.png'.format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.methods))
 
     # testing
     net_glob.eval()

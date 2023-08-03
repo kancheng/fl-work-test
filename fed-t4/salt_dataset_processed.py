@@ -8,6 +8,10 @@ from libs import *
 
 # Configs
 
+pad_left = 27
+pad_right = 27
+fine_size = 202
+
 train_image_dir = 'external/salt/train/images'
 train_mask_dir = 'external/salt/train/masks'
 test_image_dir = 'external/salt/test/images'
