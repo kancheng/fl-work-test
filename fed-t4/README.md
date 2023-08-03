@@ -98,6 +98,10 @@ python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 5
 python main_fed.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 50 --gpu 0 --num_classes 100
 
 python main_fed.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 50 --gpu 0 --num_classes 100
+
+python main_nn.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 5 --gpu 0 --num_classes 100
+
+python main_nn.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 5 --gpu 0 --num_classes 100
 ```
 
 

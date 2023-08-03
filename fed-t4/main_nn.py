@@ -1,20 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Python version: 3.6
+# Python version: 3.10
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
-import torch
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
-import torch.optim as optim
-from torchvision import datasets, transforms
-
-from utils.options import args_parser
-from models.Nets import MLP, CNNMnist, CNNCifar, CNNCifar100
-
+from libs import *
 
 def test(net_g, data_loader):
     # testing
@@ -62,7 +50,7 @@ if __name__ == '__main__':
         transform = transforms.Compose(
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        dataset_train = datasets.CIFAR10('./data/cifar100', train=True, transform=transform, target_transform=None, download=True)
+        dataset_train = datasets.CIFAR100('./data/cifar100', train=True, transform=transform, target_transform=None, download=True)
         img_size = dataset_train[0][0].shape
     else:
         exit('Error: unrecognized dataset')
