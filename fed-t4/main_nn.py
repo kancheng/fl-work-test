@@ -85,8 +85,8 @@ if __name__ == '__main__':
 
     # training
     optimizer = optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum)
-    # train_loader = DataLoader(dataset_train, batch_size=64, shuffle=True)
-    train_loader = DataLoader(dataset_train, batch_size=8, shuffle=True)
+    train_loader = DataLoader(dataset_train, batch_size=64, shuffle=True)
+    # train_loader = DataLoader(dataset_train, batch_size=8, shuffle=True)
 
     list_loss = []
     net_glob.train()
@@ -134,6 +134,10 @@ if __name__ == '__main__':
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_test = datasets.CIFAR100('./data/cifar100', train=False, transform=transform, target_transform=None, download=True)
+        test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
+    elif args.dataset == 'emnist':
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
+        dataset_test = datasets.EMNIST('./data/emnist/', split = 'digits', train=False, download=True, target_transform=None,  transform=transform)
         test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
     else:
         exit('Error: unrecognized dataset')
