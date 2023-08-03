@@ -13,7 +13,7 @@ import torch
 from utils.sampling import mnist_iid, mnist_noniid, cifar_iid
 from utils.options import args_parser
 from models.Update import LocalUpdate
-from models.Nets import MLP, CNNMnist, CNNCifar
+from models.Nets import MLP, CNNMnist, CNNCifar, CNNCifar100
 from models.Fed import FedAvg
 from models.test import test_img
 
@@ -42,10 +42,10 @@ if __name__ == '__main__':
         else:
             exit('Error: only consider IID setting in CIFAR10')
     elif args.dataset == 'cifar100':
-        # trans_cifar100 = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        trans_cifar100 = transforms.Compose([transforms.ToTensor(),
-                                                transforms.Normalize(mean=[0.5071, 0.4867, 0.4408], 
-                                                                     std=[0.2675, 0.2565, 0.2761])])
+        trans_cifar100 = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        # trans_cifar100 = transforms.Compose([transforms.ToTensor(),
+        #                                        transforms.Normalize(mean=[0.5071, 0.4867, 0.4408], 
+        #                                                             std=[0.2675, 0.2565, 0.2761])])
         dataset_train = datasets.CIFAR100('./data/cifar100', train=True, download=True, transform=trans_cifar100)
         dataset_test = datasets.CIFAR100('./data/cifar100', train=False, download=True, transform=trans_cifar100)
         if args.iid:
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = CNNCifar(args=args).to(args.device)
     elif args.model == 'cnn' and args.dataset == 'cifar100':
-        net_glob = CNNCifar(args=args).to(args.device)
+        net_glob = CNNCifar100(args=args).to(args.device)
     elif args.model == 'cnn' and args.dataset == 'mnist':
         net_glob = CNNMnist(args=args).to(args.device)
     elif args.model == 'mlp':

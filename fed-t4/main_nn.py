@@ -85,7 +85,8 @@ if __name__ == '__main__':
 
     # training
     optimizer = optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum)
-    train_loader = DataLoader(dataset_train, batch_size=64, shuffle=True)
+    # train_loader = DataLoader(dataset_train, batch_size=64, shuffle=True)
+    train_loader = DataLoader(dataset_train, batch_size=8, shuffle=True)
 
     list_loss = []
     net_glob.train()
