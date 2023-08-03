@@ -214,7 +214,7 @@ class ExternalDatasetObject:
                 print('test mes medical-mnist.')
 
                 trn_load, tst_load = load_external_data(EDIR)
-                self.channels = 1; self.width = 28; self.height = 28; self.n_cls = 10;
+                # self.channels = 1; self.width = 28; self.height = 28; self.n_cls = 10;
                 # transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
                 # trnset = torchvision.datasets.MNIST(root='%sData/Raw' %self.data_path, 
                 #                                     train=True , download=True, transform=transform)
@@ -232,8 +232,6 @@ class ExternalDatasetObject:
             if self.dataset == 'salt':
                 print('test mes salt.')
                 trn_load, tst_load = load_external_data(EDIR)
-                trn_load = torch.utils.data.DataLoader(trnset, batch_size=60000, shuffle=False, num_workers=1)
-                tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=1)
                 self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 1;
             
             # Shuffle Data

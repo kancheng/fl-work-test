@@ -10,6 +10,7 @@ import torch
 from torch.utils import data
 import torchvision
 import torchvision.transforms as transforms
+# from torchvision import transforms
 import torchvision.datasets as datasets
 
 import torch.nn as nn

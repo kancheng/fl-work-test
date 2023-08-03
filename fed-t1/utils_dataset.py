@@ -15,8 +15,28 @@ def keep_same_size_obj(obj, size=(256, 256)):
         mask = mask.convert('L')
     mask.paste(obj, (0, 0))
     mask = mask.resize(size)
-    return mask
+    # 定義數據轉換，將 PIL.Image 轉換為 Tensor
+    transform = transforms.ToTensor()
 
+    # 進行數據轉換
+    input_tensor = transform(mask)
+    # 將 batch 維度增加，因為這個模型的輸入是 batch_size x channels x height x width
+    input_tensor = input_tensor.unsqueeze(0)
+    return input_tensor
+
+
+# import torch
+# import torchvision.transforms.functional as F
+# from PIL import Image
+
+# # 假設你有一個形狀為 (3, 256, 256) 的 Tensor，表示一個彩色影像
+# tensor_color = torch.randn(3, 256, 256)
+
+# # 使用 to_grayscale() 方法將彩色影像轉換為灰階影像
+# tensor_gray = F.to_grayscale(tensor_color, num_output_channels=1)
+
+# # 確保形狀正確
+# print("灰階 Tensor 形狀：", tensor_gray.shape)
 class DatasetObject:
     def __init__(self, dataset, n_client, seed, rule, unbalanced_sgm=0, rule_arg='', data_path=''):
         self.dataset  = dataset
@@ -557,7 +577,7 @@ class ShakespeareObjectCrop_noniid:
         
         self.tst_x = np.asarray(self.tst_x)
         self.tst_y = np.asarray(self.tst_y)
-    
+
 class Dataset(torch.utils.data.Dataset):
     
     def __init__(self, data_x, data_y=True, train=False, dataset_name=''):
@@ -592,15 +612,37 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         if self.name == 'mnist':
-            X = keep_same_size_obj(self.X_data[idx, :])
-            # X = self.X_data[idx, :]
+            transform256 = transforms.Compose([
+                transforms.ToPILImage(),  # 將 Tensor 轉換為 PIL 影像
+                transforms.Grayscale(num_output_channels=1),  # 轉為灰階影像，通道數設為 1
+                transforms.Resize((256, 256)),  # 調整大小為 256x256
+                transforms.ToTensor()  # 轉換回 Tensor
+            ])
+
+            # 進行數據轉換
+            # tensor_image = transform256(tensor)
+
+
+            # X = keep_same_size_obj(self.X_data[idx, :].numpy())
+            #print(keep_same_size_obj(self.X_data[idx, :]))
+            #print((self.X_data[idx, :]))
+            X = transform256(self.X_data[idx, :])
+            X = X.view(1, -1)
+            # 將 batch 維度增加，因為這個模型的輸入是 batch_size x channels x height x width
+            # X = X.unsqueeze(0)
+            print(X)
+            print(type(X))
             if isinstance(self.y_data, bool):
                 return X
             else:
-                y = keep_same_size_obj(self.y_data[idx])
-                # y = self.y_data[idx]
+                # y = keep_same_size_obj(self.y_data[idx].numpy())
+                y = transform256(self.y_data[idx])
+                y = y.view(1, -1)
+                # y = y.unsqueeze(0)
+                print(y)
+                print(type(y))
                 return X, y
-                # return transforms(X), transforms(y)
+                # return transform(X), transform(y)
         elif self.name == 'synt' or self.name == 'emnist':
             X = self.X_data[idx, :]
             if isinstance(self.y_data, bool):
