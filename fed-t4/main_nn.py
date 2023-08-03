@@ -13,7 +13,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 
 from utils.options import args_parser
-from models.Nets import MLP, CNNMnist, CNNCifar
+from models.Nets import MLP, CNNMnist, CNNCifar, CNNCifar100
 
 
 def test(net_g, data_loader):
@@ -70,6 +70,8 @@ if __name__ == '__main__':
     # build model
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = CNNCifar(args=args).to(args.device)
+    elif args.model == 'cnn' and args.dataset == 'cifar100':
+        net_glob = CNNCifar100(args=args).to(args.device)
     elif args.model == 'cnn' and args.dataset == 'mnist':
         net_glob = CNNMnist(args=args).to(args.device)
     elif args.model == 'mlp':
@@ -130,7 +132,7 @@ if __name__ == '__main__':
         transform = transforms.Compose(
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        dataset_test = datasets.CIFAR10('./data/cifar100', train=False, transform=transform, target_transform=None, download=True)
+        dataset_test = datasets.CIFAR100('./data/cifar100', train=False, transform=transform, target_transform=None, download=True)
         test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
     else:
         exit('Error: unrecognized dataset')

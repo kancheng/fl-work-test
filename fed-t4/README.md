@@ -28,28 +28,6 @@ For example:
 
 ```
 python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
-
-python main_nn.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
-
-python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0  
-
-python main_nn.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 
-
-python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0 --all_clients
-
-python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 --all_clients
-
-python main_fed.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
-
-python main_nn.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
-
-python main_fed.py --dataset cifar --iid --num_channels 1 --model mlp --epochs 50 --gpu 0  
-
-python main_nn.py --dataset cifar --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 
-
-python main_fed.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0 --all_clients
-
-python main_fed.py --dataset cifar --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 --all_clients
 ```
 
 
@@ -85,5 +63,37 @@ McMahan, Brendan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise Aguera y 
 
 ## Cite As
 Shaoxiong Ji. (2018, March 30). A PyTorch Implementation of Federated Learning. Zenodo. http://doi.org/10.5281/zenodo.4321561
+
+## CMD
+
+```
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_nn.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0  
+
+python main_nn.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0 --all_clients
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 --all_clients
+
+python main_fed.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_nn.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 50 --gpu 0  
+
+python main_nn.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 50 --gpu 0  
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 50 --gpu 0  
+
+python main_nn.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 50 --gpu 0 
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 50 --gpu 0 --all_clients
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 50 --gpu 0 --all_clients
+```
 
 
