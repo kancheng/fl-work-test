@@ -58,6 +58,12 @@ if __name__ == '__main__':
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR10('./data/cifar', train=True, transform=transform, target_transform=None, download=True)
         img_size = dataset_train[0][0].shape
+    elif args.dataset == 'cifar100':
+        transform = transforms.Compose(
+            [transforms.ToTensor(),
+             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        dataset_train = datasets.CIFAR10('./data/cifar100', train=True, transform=transform, target_transform=None, download=True)
+        img_size = dataset_train[0][0].shape
     else:
         exit('Error: unrecognized dataset')
 
@@ -119,6 +125,12 @@ if __name__ == '__main__':
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_test = datasets.CIFAR10('./data/cifar', train=False, transform=transform, target_transform=None, download=True)
+        test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
+    elif args.dataset == 'cifar100':
+        transform = transforms.Compose(
+            [transforms.ToTensor(),
+             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        dataset_test = datasets.CIFAR10('./data/cifar100', train=False, transform=transform, target_transform=None, download=True)
         test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
     else:
         exit('Error: unrecognized dataset')

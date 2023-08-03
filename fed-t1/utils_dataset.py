@@ -626,20 +626,22 @@ class Dataset(torch.utils.data.Dataset):
             # X = keep_same_size_obj(self.X_data[idx, :].numpy())
             #print(keep_same_size_obj(self.X_data[idx, :]))
             #print((self.X_data[idx, :]))
-            X = transform256(self.X_data[idx, :])
-            X = X.view(1, -1)
+            # X = transform256(self.X_data[idx, :])
+            X = self.X_data[idx, :]
+            # X = X.view(1, -1)
             # 將 batch 維度增加，因為這個模型的輸入是 batch_size x channels x height x width
             # X = X.unsqueeze(0)
-            print(X)
+            print('X----------------------------',X)
             print(type(X))
             if isinstance(self.y_data, bool):
                 return X
             else:
+                y = self.y_data[idx]
                 # y = keep_same_size_obj(self.y_data[idx].numpy())
-                y = transform256(self.y_data[idx])
-                y = y.view(1, -1)
+                # y = transform256(self.y_data[idx])
+                # y = y.view(1, -1)
                 # y = y.unsqueeze(0)
-                print(y)
+                print('y--------------------------',y)
                 print(type(y))
                 return X, y
                 # return transform(X), transform(y)

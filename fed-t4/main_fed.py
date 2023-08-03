@@ -41,6 +41,14 @@ if __name__ == '__main__':
             dict_users = cifar_iid(dataset_train, args.num_users)
         else:
             exit('Error: only consider IID setting in CIFAR10')
+    elif args.dataset == 'cifar100':
+        trans_cifar100 = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        dataset_train = datasets.CIFAR100('../data/cifar100', train=True, download=True, transform=trans_cifar100)
+        dataset_test = datasets.CIFAR100('../data/cifar100', train=False, download=True, transform=trans_cifar100)
+        if args.iid:
+            dict_users = cifar_iid(dataset_train, args.num_users)
+        else:
+            exit('Error: only consider IID setting in CIFAR100')
     else:
         exit('Error: unrecognized dataset')
     img_size = dataset_train[0][0].shape

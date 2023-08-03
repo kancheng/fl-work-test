@@ -25,7 +25,34 @@ Federated learning with MLP and CNN is produced by:
 See the arguments in [options.py](utils/options.py). 
 
 For example:
-> python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+```
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_nn.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0  
+
+python main_nn.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 50 --gpu 0 --all_clients
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 --all_clients
+
+python main_fed.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_nn.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+
+python main_fed.py --dataset cifar --iid --num_channels 1 --model mlp --epochs 50 --gpu 0  
+
+python main_nn.py --dataset cifar --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 
+
+python main_fed.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0 --all_clients
+
+python main_fed.py --dataset cifar --iid --num_channels 1 --model mlp --epochs 50 --gpu 0 --all_clients
+```
+
+
 
 `--all_clients` for averaging over all client models
 

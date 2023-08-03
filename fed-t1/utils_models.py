@@ -225,14 +225,12 @@ class client_model(nn.Module):
             self.base_model = models.resnet18(True)
             self.base_layers = list(self.base_model.children())
             self.layer1 = nn.Sequential(
-                # nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
                 nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
                 self.base_layers[1],
                 self.base_layers[2])
             self.layer2 = nn.Sequential(*self.base_layers[3:5])
             self.layer3 = self.base_layers[5]
             self.layer4 = self.base_layers[6]
-            # self.layer5 = self.base_layers[7]
             self.layer5 = self.base_layers[7]
             self.decode4 = UNetDecoder(512, 256+256, 256)
             self.decode3 = UNetDecoder(256, 256+128, 256)

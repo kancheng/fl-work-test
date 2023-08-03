@@ -232,7 +232,7 @@ class ExternalDatasetObject:
             if self.dataset == 'salt':
                 print('test mes salt.')
                 trn_load, tst_load = load_external_data(EDIR)
-                self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 1;
+                # self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 1;
             
             # Shuffle Data
             np.random.seed(self.seed)
