@@ -52,8 +52,9 @@ if __name__ == '__main__':
         x_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Grayscale(num_output_channels=1),
-            # transforms.Resize([512, 512]),
-            transforms.Resize([256, 256]),
+            # transforms.Resize([1024, 1024]),
+            transforms.Resize([512, 512]),
+            # transforms.Resize([256, 256]),
             # transforms.Grayscale(num_output_channels=1),
             # 标准化至[-1,1],规定均值和标准差
             transforms.Normalize([0.5], [0.5])  # torchvision.transforms.Normalize(mean, std, inplace=False)
@@ -62,8 +63,9 @@ if __name__ == '__main__':
         y_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Grayscale(num_output_channels=1),
-            # transforms.Resize([512, 512]),
-            transforms.Resize([256, 256]),
+            # transforms.Resize([1024, 1024]),
+            transforms.Resize([512, 512]),
+            # transforms.Resize([256, 256]),
         ])
         
         train_dataset_pre = SaltDataset(salt_train_dir, transform=x_transform, target_transform=y_transform)
@@ -126,7 +128,13 @@ if __name__ == '__main__':
             idxs_users = np.random.choice(range(args.num_users), m, replace=False)
             for idx in idxs_users:
                 local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                # RuntimeError: Input type (torch.cuda.LongTensor) and weight type (torch.cuda.FloatTensor) should be the same
+                if torch.cuda.is_available():
+                    w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device)).cuda()
+                else:
+                    w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                # w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+
                 if args.all_clients:
                     w_locals[idx] = copy.deepcopy(w)
                 else:

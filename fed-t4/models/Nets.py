@@ -82,6 +82,79 @@ class CNNCifar100(nn.Module):
         x = self.fc3(x)
         return x
 
+# class conv_block(nn.Module):
+#     def __init__(self, in_c, out_c):
+#         super().__init__()
+#         self.conv1 = nn.Conv2d(in_c, out_c, kernel_size=3, padding=1)
+#         self.bn1 = nn.BatchNorm2d(out_c)
+#         self.conv2 = nn.Conv2d(out_c, out_c, kernel_size=3, padding=1)
+#         self.bn2 = nn.BatchNorm2d(out_c)
+#         self.relu = nn.ReLU()
+#     def forward(self, inputs):
+#         x = self.conv1(inputs)
+#         x = self.bn1(x)
+#         x = self.relu(x)
+#         x = self.conv2(x)
+#         x = self.bn2(x)
+#         x = self.relu(x)
+#         return x
+
+# class encoder_block(nn.Module):
+#     def __init__(self, in_c, out_c):
+#         super().__init__()
+#         self.conv = conv_block(in_c, out_c)
+#         self.pool = nn.MaxPool2d((2, 2))
+#     def forward(self, inputs):
+#         x = self.conv(inputs)
+#         p = self.pool(x)
+#         return x, p
+
+# class decoder_block(nn.Module):
+#     def __init__(self, in_c, out_c):
+#         super().__init__()
+#         self.up = nn.ConvTranspose2d(in_c, out_c, kernel_size=2, stride=2, padding=0)
+#         self.conv = conv_block(out_c+out_c, out_c)
+#     def forward(self, inputs, skip):
+#         x = self.up(inputs)
+#         x = torch.cat([x, skip], axis=1)
+#         x = self.conv(x)
+#         return x
+    
+# class Salt_UNet(nn.Module):
+#     def __init__(self, args):
+#         super().__init__()
+#         """ Encoder """
+#         # self.e1 = encoder_block(3, 64)
+#         self.e1 = encoder_block(10, 64)
+#         self.e2 = encoder_block(64, 128)
+#         self.e3 = encoder_block(128, 256)
+#         self.e4 = encoder_block(256, 512)
+#         """ Bottleneck """
+#         self.b = conv_block(512, 1024)
+#         """ Decoder """
+#         self.d1 = decoder_block(1024, 512)
+#         self.d2 = decoder_block(512, 256)
+#         self.d3 = decoder_block(256, 128)
+#         self.d4 = decoder_block(128, 64)
+#         """ Classifier """
+#         self.outputs = nn.Conv2d(64, 10, kernel_size=1, padding=0)
+#     def forward(self, inputs):
+#         """ Encoder """
+#         s1, p1 = self.e1(inputs)
+#         s2, p2 = self.e2(p1)
+#         s3, p3 = self.e3(p2)
+#         s4, p4 = self.e4(p3)
+#         """ Bottleneck """
+#         b = self.b(p4)
+#         """ Decoder """
+#         d1 = self.d1(b, s4)
+#         d2 = self.d2(d1, s3)
+#         d3 = self.d3(d2, s2)
+#         d4 = self.d4(d3, s1)
+#         """ Classifier """
+#         outputs = self.outputs(d4)
+#         return outputs
+    
 class Decoder(nn.Module):
     def __init__(self, in_channels, middle_channels, out_channels):
         super(Decoder, self).__init__()
@@ -92,7 +165,12 @@ class Decoder(nn.Module):
             )
     def forward(self, x1, x2):
         x1 = self.up(x1)
+        # x1 = x1.view(x1.size(1), -1)
+        print(x1.size())
+        print(x1.shape)
+        print(len(x1.shape))
         x1 = torch.cat((x1, x2), dim=1)
+        # x1 = torch.cat((x1, x2))
         x1 = self.conv_relu(x1)
         return x1
 
@@ -103,12 +181,17 @@ class Salt_UNet(nn.Module):
         self.base_model = torchvision.models.resnet18(True)
         self.base_layers = list(self.base_model.children())
         self.layer1 = nn.Sequential(
-            nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
+            # nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
+            # RuntimeError: Given groups=1, weight of size [64, 1, 7, 7], expected input[1, 10, 1, 256] to have 1 channels, but got 10 channels instead
+            # nn.Conv2d(10, 1, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
+            # nn.Conv2d(10, 1, kernel_size=(1, 256), stride=(2, 2), padding=(3, 3), bias=False),
+            nn.Conv2d(10, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=True),
             self.base_layers[1],
             self.base_layers[2])
         self.layer2 = nn.Sequential(*self.base_layers[3:5])
         self.layer3 = self.base_layers[5]
         self.layer4 = self.base_layers[6]
+        # self.layer5 = self.base_layers[7]
         self.layer5 = self.base_layers[7]
         self.decode4 = Decoder(512, 256+256, 256)
         self.decode3 = Decoder(256, 256+128, 256)
@@ -119,8 +202,8 @@ class Salt_UNet(nn.Module):
             nn.Conv2d(64, 32, kernel_size=3, padding=1, bias=False),
             nn.Conv2d(32, 64, kernel_size=3, padding=1, bias=False)
             )
-        self.conv_last = nn.Conv2d(64, args.num_classes, 1)
-
+        # self.conv_last = nn.Conv2d(64, args.num_classes, 1)
+        self.conv_last = nn.Conv2d(64, 1, 1)
     def forward(self, input):
         e1 = self.layer1(input) # 64,128,128
         e2 = self.layer2(e1) # 64,64,64
@@ -134,6 +217,72 @@ class Salt_UNet(nn.Module):
         d0 = self.decode0(d1) # 64,256,256
         out = self.conv_last(d0) # 1,256,256
         return out
+
+# class DoubleConv(nn.Module):
+#     def __init__(self, in_ch, out_ch):
+#         super(DoubleConv, self).__init__()
+#         self.conv = nn.Sequential(
+#             nn.Conv2d(in_ch, out_ch, 3, padding=1),  # in_ch、out_ch是通道数
+#             nn.BatchNorm2d(out_ch),
+#             nn.ReLU(inplace=True),
+#             nn.Conv2d(out_ch, out_ch, 3, padding=1),
+#             nn.BatchNorm2d(out_ch),
+#             nn.ReLU(inplace=True)
+#         )
+
+#     def forward(self, x):
+#         return self.conv(x)
+# class Salt_UNet(nn.Module):
+#     def __init__(self, args, in_ch = 10, out_ch =10):
+#         super(Salt_UNet, self).__init__()
+#         self.conv1 = DoubleConv(in_ch, 64)
+#       #  self.pool1 = nn.MaxPool2d(2)  # 每次把图像尺寸缩小一半
+#         self.conv2 = DoubleConv(64, 128)
+#        # self.pool2 = nn.MaxPool2d(2)
+#         self.conv3 = DoubleConv(128, 256)
+#         # self.pool3 = nn.MaxPool2d(2)
+#         self.conv4 = DoubleConv(256, 512)
+#         # self.pool4 = nn.MaxPool2d(2)
+#         self.conv5 = DoubleConv(512, 1024)
+#         # 逆卷积
+#         self.up6 = nn.ConvTranspose2d(1024, 512, 2, stride=2)
+#         self.conv6 = DoubleConv(1024, 512)
+#         self.up7 = nn.ConvTranspose2d(512, 256, 2, stride=2)
+#         self.conv7 = DoubleConv(512, 256)
+#         self.up8 = nn.ConvTranspose2d(256, 128, 2, stride=2)
+#         self.conv8 = DoubleConv(256, 128)
+#         self.up9 = nn.ConvTranspose2d(128, 64, 2, stride=2)
+#         self.conv9 = DoubleConv(128, 64)
+
+#         self.conv10 = nn.Conv2d(64, out_ch, 1)
+#         self.sigmoid = nn.Sigmoid()
+#     def forward(self, x):
+#         c1 = self.conv1(x)
+#        # p1 = self.pool1(c1)
+#         c2 = self.conv2(c1)
+#       #  p2 = self.pool2(c2)
+#         c3 = self.conv3(c2)
+#        # p3 = self.pool3(c3)
+#         c4 = self.conv4(c3)
+#         # p4 = self.pool4(c4)
+#         c5 = self.conv5(c4)
+#         # c5 = self.conv5(p4)
+#         up_6 = self.up6(c5)
+#        # merge6 = torch.cat([up_6, c4], dim=1)  # 按维数1（列）拼接,列增加
+#         c6 = self.conv6(up_6)
+#         up_7 = self.up7(c6)
+#        # merge7 = torch.cat([up_7, c3], dim=1)
+#         c7 = self.conv7(up_7)
+#         up_8 = self.up8(c7)
+#        # merge8 = torch.cat([up_8, c2], dim=1)
+#         c8 = self.conv8(up_8)
+#         up_9 = self.up9(c8)
+#        # merge9 = torch.cat([up_9, c1], dim=1)
+#         c9 = self.conv9(up_9)
+#         c10 = self.conv10(c9)
+
+#         out = self.sigmoid(c10)
+#         return out
     
 class Mnist_2NN(nn.Module):
     def __init__(self, args):
