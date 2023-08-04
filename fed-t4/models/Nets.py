@@ -81,24 +81,23 @@ class CNNCifar100(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-    
 
-class UNetDecoder(nn.Module):
-  def __init__(self, in_channels, middle_channels, out_channels):
-    super(Decoder, self).__init__()
-    self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
-    self.conv_relu = nn.Sequential(
-        nn.Conv2d(middle_channels, out_channels, kernel_size=3, padding=1),
-        nn.ReLU(inplace=True)
-        )
+class Decoder(nn.Module):
+    def __init__(self, in_channels, middle_channels, out_channels):
+        super(Decoder, self).__init__()
+        self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
+        self.conv_relu = nn.Sequential(
+            nn.Conv2d(middle_channels, out_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True)
+            )
     def forward(self, x1, x2):
         x1 = self.up(x1)
         x1 = torch.cat((x1, x2), dim=1)
         x1 = self.conv_relu(x1)
         return x1
 
-class UNet(nn.Module):
-    def __init__(self, args):
+class Salt_UNet(nn.Module):
+    def __init__(self,  args):
         super().__init__()
         
         self.base_model = torchvision.models.resnet18(True)
@@ -111,10 +110,10 @@ class UNet(nn.Module):
         self.layer3 = self.base_layers[5]
         self.layer4 = self.base_layers[6]
         self.layer5 = self.base_layers[7]
-        self.decode4 = UNetDecoder(512, 256+256, 256)
-        self.decode3 = UNetDecoder(256, 256+128, 256)
-        self.decode2 = UNetDecoder(256, 128+64, 128)
-        self.decode1 = UNetDecoder(128, 64+64, 64)
+        self.decode4 = Decoder(512, 256+256, 256)
+        self.decode3 = Decoder(256, 256+128, 256)
+        self.decode2 = Decoder(256, 128+64, 128)
+        self.decode1 = Decoder(128, 64+64, 64)
         self.decode0 = nn.Sequential(
             nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
             nn.Conv2d(64, 32, kernel_size=3, padding=1, bias=False),
@@ -122,8 +121,8 @@ class UNet(nn.Module):
             )
         self.conv_last = nn.Conv2d(64, args.num_classes, 1)
 
-    def forward(self, x):
-        e1 = self.layer1(x) # 64,128,128
+    def forward(self, input):
+        e1 = self.layer1(input) # 64,128,128
         e2 = self.layer2(e1) # 64,64,64
         e3 = self.layer3(e2) # 128,32,32
         e4 = self.layer4(e3) # 256,16,16
@@ -133,9 +132,9 @@ class UNet(nn.Module):
         d2 = self.decode2(d3, e2) # 128,64,64
         d1 = self.decode1(d2, e1) # 64,128,128
         d0 = self.decode0(d1) # 64,256,256
-        x = self.conv_last(d0) # 1,256,256
-        return x
-
+        out = self.conv_last(d0) # 1,256,256
+        return out
+    
 class Mnist_2NN(nn.Module):
     def __init__(self, args):
         super().__init__()

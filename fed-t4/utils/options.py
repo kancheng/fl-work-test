@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Python version: 3.6
+# Python version: 3.10
 
 import argparse
 
@@ -29,6 +29,12 @@ def args_parser():
     parser.add_argument('--num_filters', type=int, default=32, help="number of filters for conv nets")
     parser.add_argument('--max_pool', type=str, default='True',
                         help="Whether use max pooling rather than strided convolutions")
+    
+    # dataset.
+    parser.add_argument('--data_path', default='data/', help='folder to train data')
+    
+    # external dataset.
+    parser.add_argument('--edata_path', default='external/', help='folder to train data')
 
     # other arguments
     parser.add_argument('--dataset', type=str, default='mnist', help="name of dataset")

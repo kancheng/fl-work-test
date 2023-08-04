@@ -3,7 +3,7 @@
 # Python version: 3.10
 
 from libs import *
-# from salt_dataset_processed import *
+from salt_dataset_processed import *
 
 if __name__ == '__main__':
     # parse args
@@ -38,9 +38,6 @@ if __name__ == '__main__':
             exit('Error: only consider IID setting in CIFAR10')
     elif args.dataset == 'cifar100':
         trans_cifar100 = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        # trans_cifar100 = transforms.Compose([transforms.ToTensor(),
-        #                                        transforms.Normalize(mean=[0.5071, 0.4867, 0.4408], 
-        #                                                             std=[0.2675, 0.2565, 0.2761])])
         dataset_train = datasets.CIFAR100('./data/cifar100', train=True, download=True, transform=trans_cifar100)
         dataset_test = datasets.CIFAR100('./data/cifar100', train=False, download=True, transform=trans_cifar100)
         if args.iid:
@@ -48,12 +45,40 @@ if __name__ == '__main__':
         else:
             exit('Error: only consider IID setting in CIFAR100')
     elif args.dataset == 'salt':
-        trans_salt = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        # https://github.com/rabbitdeng/Unet-pytorch/blob/main/train.py
+        batch_size = args.local_bs
+        salt_train_dir = 'external/salt/train/'
+        salt_test_dir = 'external/salt/test/images'
+        x_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Grayscale(num_output_channels=1),
+            # transforms.Resize([512, 512]),
+            transforms.Resize([256, 256]),
+            # transforms.Grayscale(num_output_channels=1),
+            # 标准化至[-1,1],规定均值和标准差
+            transforms.Normalize([0.5], [0.5])  # torchvision.transforms.Normalize(mean, std, inplace=False)
+        ])
+        # mask 只需要转换为tensor
+        y_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Grayscale(num_output_channels=1),
+            # transforms.Resize([512, 512]),
+            transforms.Resize([256, 256]),
+        ])
         
+        train_dataset_pre = SaltDataset(salt_train_dir, transform=x_transform, target_transform=y_transform)
+        # dataset_train = DataLoader(train_dataset_pre, batch_size = batch_size, shuffle=True)
+        dataset_train = train_dataset_pre
+
+        test_dataset_pre = SaltDataset(salt_train_dir, transform=x_transform, target_transform=y_transform)
+        dataset_test = test_dataset_pre 
+        if args.iid:
+            dict_users = exter_iid(dataset_train, args.num_users)
+        else:
+            exit('Error: only consider IID setting in CIFAR10')
     else:
         exit('Error: unrecognized dataset')
     img_size = dataset_train[0][0].shape
-
     # build model
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = CNNCifar(args=args).to(args.device)
@@ -65,6 +90,8 @@ if __name__ == '__main__':
         net_glob = Mnist_2NN(args=args).to(args.device)
     elif args.model == 'nn' and args.dataset == 'emnist':
         net_glob = Emnist_NN(args=args).to(args.device)
+    elif args.model == 'unet' and args.dataset == 'salt':
+        net_glob = Salt_UNet(args=args).to(args.device)
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:

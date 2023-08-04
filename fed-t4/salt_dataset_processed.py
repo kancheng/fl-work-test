@@ -1,128 +1,69 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python version: 3.10
+import torch
+import torch.utils.data as data
+import os
+import PIL.Image as Image
+import cv2
 
-# Library
+class SaltDataset(data.Dataset):
 
-from libs import *
+    def __init__(self, root, transform=None, target_transform=None):
+        # img_num = len(os.listdir(os.path.join(root, 'images')))
+        img_list = os.listdir(os.path.join(root, 'images'))
+        mask_list = os.listdir(os.path.join(root, 'masks'))
 
-# Configs
+        imgs = []
+        for file, mask in zip(img_list, mask_list):
+            imgs.append([file, mask])
 
-pad_left = 27
-pad_right = 27
-fine_size = 202
+        self.imgs = imgs
+        self.tempath_images = os.path.join(root, 'images')
+        self.tempath_masks = os.path.join(root, 'masks')
+        self.transform = transform
+        self.target_transform = target_transform
 
-train_image_dir = 'external/salt/train/images'
-train_mask_dir = 'external/salt/train/masks'
-test_image_dir = 'external/salt/test/images'
-
-# Split
-
-depths = pd.read_csv('external/salt/depths.csv')
-depths.sort_values('z', inplace=True)
-depths.drop('z', axis=1, inplace=True)
-depths['fold'] = (list(range(0,5)) * depths.shape[0])[:depths.shape[0]]
-
-train_df = pd.read_csv('external/salt/train.csv')
-train_df = train_df.merge(depths)
-dist = []
-for id in train_df.id.values:
-  img = cv2.imread(f'external/salt/images/{id}.png', cv2.IMREAD_GRAYSCALE)
-  dist.append(np.unique(img).shape[0])
-train_df['unique_pixels'] = dist
-
-# Dataset
-
-def trainImageFetch(images_id):
-    image_train = np.zeros((images_id.shape[0], 101, 101), dtype=np.float32)
-    mask_train = np.zeros((images_id.shape[0], 101, 101), dtype=np.float32)
-
-    for idx, image_id in tqdm(enumerate(images_id), total=images_id.shape[0]):
-        image_path = os.path.join(train_image_dir, image_id+'.png')
-        mask_path = os.path.join(train_mask_dir, image_id+'.png')
-
-        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255
-        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255
-
-        image_train[idx] = image
-        mask_train[idx] = mask
-    
-    return image_train, mask_train
-
-def testImageFetch(test_id):
-    image_test = np.zeros((len(test_id), 101, 101), dtype=np.float32)
-
-    for idx, image_id in tqdm(enumerate(test_id), total=len(test_id)):
-        image_path = os.path.join(test_image_dir, image_id+'.png')
-        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255
-        image_test[idx] = image
-
-    return image_test
-
-def do_resize2(image, mask, H, W):
-    image = cv2.resize(image, dsize=(W,H))
-    mask = cv2.resize(mask, dsize=(W,H))
-    return image, mask
-
-def do_center_pad(image, pad_left, pad_right):
-    return np.pad(image, (pad_left, pad_right), 'edge')
-
-def do_center_pad2(image, mask, pad_left, pad_right):
-    image = do_center_pad(image, pad_left, pad_right)
-    mask = do_center_pad(mask, pad_left, pad_right)
-    return image, mask
-
-class SaltDataset(Dataset):
-    def __init__(self, image_list, mode, mask_list=None, fine_size=202, pad_left=0, pad_right=0):
-        self.imagelist = image_list
-        self.mode = mode
-        self.masklist = mask_list
-        self.fine_size = fine_size
-        self.pad_left = pad_left
-        self.pad_right = pad_right
+    def __getitem__(self, index):
+        x_path, y_path = self.imgs[index]
+        img_x = cv2.imread(os.path.join(self.tempath_images, y_path))
+        img_y = cv2.imread(os.path.join(self.tempath_masks, y_path))
+        ## TEST !??
+        if self.transform is not None:
+            img_x = self.transform(img_x)
+            print(img_x)
+            img_x = torch.argmax(img_x, dim=1)
+            print(img_x)
+        if self.target_transform(img_y) is not None:
+            print(img_y)
+            img_y = self.target_transform(img_y)
+            img_y = torch.argmax(img_y, dim=1)
+        return img_x, img_y
 
     def __len__(self):
-        return len(self.imagelist)
+        return len(self.imgs)
 
-    def __getitem__(self, idx):
-        image = deepcopy(self.imagelist[idx])
 
-        if self.mode == 'train':
-            mask = deepcopy(self.masklist[idx])
-            label = np.where(mask.sum() == 0, 1.0, 0.0).astype(np.float32)
+class TestDataset(data.Dataset):
 
-            if self.fine_size != image.shape[0]:
-                image, mask = do_resize2(image, mask, self.fine_size, self.fine_size)
+    def __init__(self, root, transform=None, target_transform=None):
+        # img_num = len(os.listdir(os.path.join(root, 'images')))
+        img_list = os.listdir(os.path.join(root, 'images'))
+        imgs = []
+        for i, pic in enumerate(img_list):
+            imgs.append(pic)
+        self.imgs = imgs
+        self.tempath_images = os.path.join(root, 'images')
+        self.transform = transform
+        self.target_transform = target_transform
 
-            if self.pad_left != 0:
-                image, mask = do_center_pad2(image, mask, self.pad_left, self.pad_right)
+    def __getitem__(self, index):
+        x_path = self.imgs[index]
+        print(x_path)
+        img_x = cv2.imread(os.path.join(self.tempath_images, x_path))
+        if self.transform is not None:
+            img_x = self.transform(img_x)
+        return img_x
+    def __len__(self):
+        return len(self.imgs)
 
-            image = image.reshape(1, image.shape[0], image.shape[1])
-            mask = mask.reshape(1, mask.shape[0], mask.shape[1])        
-
-            return image, mask, label
-
-        elif self.mode == 'val':
-            mask = deepcopy(self.masklist[idx])
-
-            if self.fine_size != image.shape[0]:
-                image, mask = do_resize2(image, mask, self.fine_size, self.fine_size)
-
-            if self.pad_left != 0:
-                image = do_center_pad(image, self.pad_left, self.pad_right)
-
-            image = image.reshape(1, image.shape[0], image.shape[1])
-            mask = mask.reshape(1, mask.shape[0], mask.shape[1])    
-
-            return image, mask
-
-        elif self.mode == 'test':
-            if self.fine_size != image.shape[0]:
-                image = cv2.resize(image, dsize=(self.fine_size, self.fine_size))
-
-            if self.pad_left != 0:
-                image = do_center_pad(image, self.pad_left, self.pad_right)
-
-            image = image.reshape(1, image.shape[0], image.shape[1])
-
-            return image         
