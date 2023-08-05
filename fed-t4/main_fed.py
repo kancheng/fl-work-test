@@ -3,7 +3,6 @@
 # Python version: 3.10
 
 from libs import *
-from salt_dataset_processed import *
 
 if __name__ == '__main__':
     # parse args
@@ -45,13 +44,6 @@ if __name__ == '__main__':
         else:
             exit('Error: only consider IID setting in CIFAR100')
     elif args.dataset == 'salt':
-        #trans_salt = transforms.Compose([transforms.ToTensor()])  #归一化到(0,1)，简单直接除以255
-        import os
-        from glob import glob
-        import sys
-        import random
-        from skimage.io import imread, imshow
-        from skimage.transform import resize
         path_train = './external/salt/train'
         path_test = './external/salt/test'
         # Set some parameters# Set s 
@@ -71,14 +63,15 @@ if __name__ == '__main__':
         print('Getting and resizing train images and masks ... ')
         sys.stdout.flush()
         for n, id_ in enumerate(train_ids):
-            img = imread(path_train + '/images/' + id_)
+            img = cv2.imread(path_train + '/images/' + id_, cv2.IMREAD_UNCHANGED)
             x = resize(img, (128, 128, 1), mode='constant', preserve_range=True)
             X_train[n] = x
-            mask = imread(path_train + '/masks/' + id_)
+            mask = cv2.imread(path_train + '/masks/' + id_, cv2.IMREAD_UNCHANGED)
             Y_train[n] = resize(mask, (128, 128, 1), 
                                 mode='constant', 
                                 preserve_range=True)
-        print('Done!')
+        print('Salt Done!')
+
         class saltIDDataset(torch.utils.data.Dataset):
             def __init__(self,preprocessed_images,train=True, preprocessed_masks=None):
                 """
@@ -101,8 +94,6 @@ if __name__ == '__main__':
                     mask = self.masks[idx]
                 return (image, mask)
         X_train_shaped = X_train.reshape(-1, 1, 128, 128)/255
-        print(X_train_shaped)
-        # print(X_train_shaped)
         Y_train_shaped = Y_train.reshape(-1, 1, 128, 128)
         X_train_shaped = X_train_shaped.astype(np.float32)
         Y_train_shaped = Y_train_shaped.astype(np.float32)
@@ -122,52 +113,18 @@ if __name__ == '__main__':
         salt_ID_dataset_val = saltIDDataset(X_train_shaped[val_idxs], 
                                             train=True, 
                                             preprocessed_masks=Y_train_shaped[val_idxs])
-
         batch_size = 16
-
         train_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_train, 
                                                 batch_size=batch_size, 
                                                 shuffle=True)
-        #done
+        # done
         dataset_train_pro = train_loader
         dataset_train = salt_ID_dataset_train
-        #dataset_train = trans_salt(dataset_train_pro)
         val_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_val, 
                                                 batch_size=batch_size, 
                                                 shuffle=False)
         dataset_test_pro = val_loader
         dataset_test = salt_ID_dataset_val
-        #dataset_test = trans_salt(dataset_test_pro)
-
-        # https://github.com/rabbitdeng/Unet-pytorch/blob/main/train.py
-        # batch_size = args.local_bs
-        # salt_train_dir = 'external/salt/train/'
-        # salt_test_dir = 'external/salt/test/images'
-        # x_transform = transforms.Compose([
-        #     transforms.ToTensor(),
-        #     transforms.Grayscale(num_output_channels=1),
-        #     # transforms.Resize([1024, 1024]),
-        #     transforms.Resize([512, 512]),
-        #     # transforms.Resize([256, 256]),
-        #     # transforms.Grayscale(num_output_channels=1),
-        #     # 标准化至[-1,1],规定均值和标准差
-        #     transforms.Normalize([0.5], [0.5])  # torchvision.transforms.Normalize(mean, std, inplace=False)
-        # ])
-        # # mask 只需要转换为tensor
-        # y_transform = transforms.Compose([
-        #     transforms.ToTensor(),
-        #     transforms.Grayscale(num_output_channels=1),
-        #     # transforms.Resize([1024, 1024]),
-        #     transforms.Resize([512, 512]),
-        #     # transforms.Resize([256, 256]),
-        # ])
-        
-        # train_dataset_pre = SaltDataset(salt_train_dir, transform=x_transform, target_transform=y_transform)
-        # # dataset_train = DataLoader(train_dataset_pre, batch_size = batch_size, shuffle=True)
-        # dataset_train = train_dataset_pre
-
-        # test_dataset_pre = SaltDataset(salt_train_dir, transform=x_transform, target_transform=y_transform)
-        # dataset_test = test_dataset_pre 
         if args.iid:
             dict_users = exter_iid(dataset_train, args.num_users)
         else:
@@ -177,19 +134,8 @@ if __name__ == '__main__':
     
     if args.dataset == 'salt':
         train_features, train_labels = next(iter(dataset_train))
-        print(type(train_features))
-        print(type(train_labels))
-        print(f"Feature batch shape: {train_features.size}")
-        #print(train_features.size())
-        print(f"Labels batch shape: {train_labels.size}")
     else:
         img_size = dataset_train[0][0].shape
-        print(img_size)
-        print(type(img_size))
-        print(len(img_size))
-        # torch.Size([1, 28, 28])
-        # <class 'torch.Size'>
-        # 3
 
     # build model
     if args.model == 'cnn' and args.dataset == 'cifar':
