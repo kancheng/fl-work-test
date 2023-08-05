@@ -48,6 +48,8 @@ class LocalUpdate(object):
                 if self.args.dataset == 'salt':
                     images = images.unsqueeze(0)
                     log_probs = net(images)
+                else :
+                    log_probs = net(images)
                 # ValueError: expected 4D input (got 3D input)
 
                 loss = self.loss_func(log_probs, labels)
