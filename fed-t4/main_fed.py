@@ -16,15 +16,15 @@ if __name__ == '__main__':
         dataset_test = datasets.MNIST('./data/mnist/', train=False, download=True, transform=trans_mnist)
         # sample users
         if args.iid:
-            dict_users = mnist_iid(dataset_train, args.num_users)
+            dict_users = mnist_iid(dataset_train, args.num_users, args.num_users_info)
         else:
-            dict_users = mnist_noniid(dataset_train, args.num_users)
-    if args.dataset == 'emnist':
+            dict_users = mnist_noniid(dataset_train, args.num_users, args.num_users_info)
+    elif args.dataset == 'emnist':
         trans_emnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
         dataset_train = datasets.EMNIST('./data/emnist/', split = 'digits', train=True, download=True, transform=trans_emnist)
         dataset_test = datasets.EMNIST('./data/emnist/', split = 'digits', train=False, download=True, transform=trans_emnist)
         if args.iid:
-            dict_users = emnist_iid(dataset_train, args.num_users)
+            dict_users = emnist_iid(dataset_train, args.num_users, args.num_users_info)
         else:
              exit('Error: only consider IID setting in EMNIST')
     elif args.dataset == 'cifar':
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         dataset_train = datasets.CIFAR10('./data/cifar', train=True, download=True, transform=trans_cifar)
         dataset_test = datasets.CIFAR10('./data/cifar', train=False, download=True, transform=trans_cifar)
         if args.iid:
-            dict_users = cifar_iid(dataset_train, args.num_users)
+            dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
         else:
             exit('Error: only consider IID setting in CIFAR10')
     elif args.dataset == 'cifar100':
@@ -40,7 +40,7 @@ if __name__ == '__main__':
         dataset_train = datasets.CIFAR100('./data/cifar100', train=True, download=True, transform=trans_cifar100)
         dataset_test = datasets.CIFAR100('./data/cifar100', train=False, download=True, transform=trans_cifar100)
         if args.iid:
-            dict_users = cifar_iid(dataset_train, args.num_users)
+            dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
         else:
             exit('Error: only consider IID setting in CIFAR100')
     elif args.dataset == 'salt':
@@ -127,7 +127,7 @@ if __name__ == '__main__':
         dataset_test_pro = val_loader
         dataset_test = salt_ID_dataset_val
         if args.iid:
-            dict_users = exter_iid(dataset_train, args.num_users)
+            dict_users = exter_iid(dataset_train, args.num_users, args.num_users_info)
         else:
             exit('Error: only consider IID setting in CIFAR10')
     else:
@@ -184,13 +184,8 @@ if __name__ == '__main__':
             m = max(int(args.frac * args.num_users), 1)
             idxs_users = np.random.choice(range(args.num_users), m, replace=False)
             for idx in idxs_users:
-                if args.model == 'unet' and args.dataset == 'salt':
-                    local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-                    w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-                   # w, loss = train_base( args, salt_ID_dataset_train, train_loader, net_glob)
-                else :
-                    local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-                    w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
+                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
                 if args.all_clients:
                     w_locals[idx] = copy.deepcopy(w)
                 else:

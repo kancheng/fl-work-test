@@ -40,14 +40,10 @@ if __name__ == '__main__':
                        transforms.Normalize((0.1307,), (0.3081,))
                    ]))
         img_size = dataset_train[0][0].shape
-    if args.dataset == 'emnist':
+    elif args.dataset == 'emnist':
         trans_emnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
         dataset_train = datasets.EMNIST('./data/emnist/', split = 'digits', train=True, download=True, transform=trans_emnist)
-        dataset_test = datasets.EMNIST('./data/emnist/', split = 'digits', train=False, download=True, transform=trans_emnist)
-        if args.iid:
-            dict_users = emnist_iid(dataset_train, args.num_users)
-        else:
-             exit('Error: only consider IID setting in EMNIST')
+        img_size = dataset_train[0][0].shape
     elif args.dataset == 'cifar':
         transform = transforms.Compose(
             [transforms.ToTensor(),
