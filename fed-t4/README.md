@@ -112,6 +112,8 @@ python main_nn.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 10
 python main_fed.py --dataset emnist --iid --num_channels 1 --model nn --epochs 10 --gpu 0  
 
 python main_nn.py --dataset emnist --iid --num_channels 1 --model nn --epochs 10 --gpu 0 
+
+python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 5 --gpu 0  
 ```
 
 

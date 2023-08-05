@@ -73,7 +73,7 @@ if __name__ == '__main__':
         print('Salt Done!')
 
         class saltIDDataset(torch.utils.data.Dataset):
-            def __init__(self,preprocessed_images,train=True, preprocessed_masks=None):
+            def __init__(self,preprocessed_images, train=True, preprocessed_masks=None):
                 """
                 Args:
                     text_file(string): path to text file
@@ -92,7 +92,7 @@ if __name__ == '__main__':
                 mask = None
                 if self.train:
                     mask = self.masks[idx]
-                return (image, mask)
+                return (image ,mask)
         X_train_shaped = X_train.reshape(-1, 1, 128, 128)/255
         Y_train_shaped = Y_train.reshape(-1, 1, 128, 128)
         X_train_shaped = X_train_shaped.astype(np.float32)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         exit('Error: unrecognized dataset')
     
     if args.dataset == 'salt':
-        train_features, train_labels = next(iter(dataset_train))
+        train_features,train_labels = next(iter(dataset_train))
     else:
         img_size = dataset_train[0][0].shape
 
@@ -184,9 +184,13 @@ if __name__ == '__main__':
             m = max(int(args.frac * args.num_users), 1)
             idxs_users = np.random.choice(range(args.num_users), m, replace=False)
             for idx in idxs_users:
-                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-
+                if args.model == 'unet' and args.dataset == 'salt':
+                    local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
+                    w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                   # w, loss = train_base( args, salt_ID_dataset_train, train_loader, net_glob)
+                else :
+                    local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
+                    w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
                 if args.all_clients:
                     w_locals[idx] = copy.deepcopy(w)
                 else:

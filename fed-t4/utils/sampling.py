@@ -65,7 +65,7 @@ def cifar_iid(dataset, num_users):
 
 def exter_iid(dataset, num_users):
     """
-    Sample I.I.D. client data from CIFAR10 &  CIFAR100 dataset
+    Sample I.I.D. client data from External.
     :param dataset:
     :param num_users:
     :return: dict of image index
@@ -75,6 +75,8 @@ def exter_iid(dataset, num_users):
     for i in range(num_users):
         dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
+        print('num', i, ':', dict_users[i])
+    print('num', i, ':', dict_users)
     return dict_users
 
 def emnist_iid(dataset, num_users):
