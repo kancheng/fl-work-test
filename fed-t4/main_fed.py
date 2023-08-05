@@ -45,6 +45,7 @@ if __name__ == '__main__':
         else:
             exit('Error: only consider IID setting in CIFAR100')
     elif args.dataset == 'salt':
+        #trans_salt = transforms.Compose([transforms.ToTensor()])  #归一化到(0,1)，简单直接除以255
         import os
         from glob import glob
         import sys
@@ -127,11 +128,16 @@ if __name__ == '__main__':
         train_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_train, 
                                                 batch_size=batch_size, 
                                                 shuffle=True)
-        dataset_train = train_loader.ToTensor()
+        #done
+        dataset_train_pro = train_loader
+        dataset_train = salt_ID_dataset_train
+        #dataset_train = trans_salt(dataset_train_pro)
         val_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_val, 
                                                 batch_size=batch_size, 
                                                 shuffle=False)
-        dataset_test = val_loader.ToTensor()
+        dataset_test_pro = val_loader
+        dataset_test = salt_ID_dataset_val
+        #dataset_test = trans_salt(dataset_test_pro)
 
         # https://github.com/rabbitdeng/Unet-pytorch/blob/main/train.py
         # batch_size = args.local_bs
@@ -173,8 +179,9 @@ if __name__ == '__main__':
         train_features, train_labels = next(iter(dataset_train))
         print(type(train_features))
         print(type(train_labels))
-        print(f"Feature batch shape: {train_features.size()}")
-        print(f"Labels batch shape: {train_labels.size()}")
+        print(f"Feature batch shape: {train_features.size}")
+        #print(train_features.size())
+        print(f"Labels batch shape: {train_labels.size}")
     else:
         img_size = dataset_train[0][0].shape
         print(img_size)

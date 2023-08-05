@@ -40,18 +40,20 @@ class LocalUpdate(object):
             batch_loss = []
             for batch_idx, (images, labels) in enumerate(self.ldr_train):
                 images, labels = images.to(self.args.device), labels.to(self.args.device)
-                if self.args.dataset == 'salt':
-                    images = images.type(torch.cuda.FloatTensor)
-                    labels = labels.type(torch.cuda.FloatTensor)
+                # if self.args.dataset == 'salt':
+                #     images = images.type(torch.cuda.FloatTensor)
+                #     labels = labels.type(torch.cuda.FloatTensor)
                 # RuntimeError: Input type (torch.cuda.LongTensor) and weight type (torch.cuda.FloatTensor) should be the same
+                
                 net.zero_grad()
-                if self.args.dataset == 'salt':
-                    images = images.unsqueeze(0)
-                    log_probs = net(images)
-                else :
-                    log_probs = net(images)
-                # ValueError: expected 4D input (got 3D input)
 
+                # if self.args.dataset == 'salt':
+                #     images = images.unsqueeze(0)
+                #     log_probs = net(images)
+                # else :
+                #     log_probs = net(images)
+                # ValueError: expected 4D input (got 3D input)
+                log_probs = net(images)
                 loss = self.loss_func(log_probs, labels)
                 loss.backward()
                 optimizer.step()

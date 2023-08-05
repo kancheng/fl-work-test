@@ -165,12 +165,10 @@ class Decoder(nn.Module):
             )
     def forward(self, x1, x2):
         x1 = self.up(x1)
-        # x1 = x1.view(x1.size(1), -1)
         print(x1.size())
         print(x1.shape)
         print(len(x1.shape))
         x1 = torch.cat((x1, x2), dim=1)
-        # x1 = torch.cat((x1, x2))
         x1 = self.conv_relu(x1)
         return x1
 
@@ -181,11 +179,7 @@ class Salt_UNet(nn.Module):
         self.base_model = torchvision.models.resnet18(True)
         self.base_layers = list(self.base_model.children())
         self.layer1 = nn.Sequential(
-            # nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
-            # RuntimeError: Given groups=1, weight of size [64, 1, 7, 7], expected input[1, 10, 1, 256] to have 1 channels, but got 10 channels instead
-            # nn.Conv2d(10, 1, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
-            # nn.Conv2d(10, 1, kernel_size=(1, 256), stride=(2, 2), padding=(3, 3), bias=False),
-            nn.Conv2d(10, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=True),
+            nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
             self.base_layers[1],
             self.base_layers[2])
         self.layer2 = nn.Sequential(*self.base_layers[3:5])
