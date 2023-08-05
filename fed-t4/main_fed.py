@@ -113,7 +113,8 @@ if __name__ == '__main__':
         salt_ID_dataset_val = saltIDDataset(X_train_shaped[val_idxs], 
                                             train=True, 
                                             preprocessed_masks=Y_train_shaped[val_idxs])
-        batch_size = 16
+        # batch_size = 16
+        batch_size = args.local_bs
         train_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_train, 
                                                 batch_size=batch_size, 
                                                 shuffle=True)
