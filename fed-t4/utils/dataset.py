@@ -14,6 +14,8 @@ import cv2
 import torch
 import torchvision.transforms as transforms
 
+# np.long -> np.longlong
+
 def convert_from_nii_to_png(img):
     high = np.quantile(img,0.99)
     low = np.min(img)
@@ -22,6 +24,28 @@ def convert_from_nii_to_png(img):
     newimg = (img - lungwin[0]) / (lungwin[1] - lungwin[0])  
     newimg = (newimg * 255).astype(np.uint8)
     return newimg
+
+class saltIDDataset(torch.utils.data.Dataset):
+    def __init__(self,preprocessed_images, train=True, preprocessed_masks=None):
+        """
+        Args:
+            text_file(string): path to text file
+            root_dir(string): directory with all train images
+        """
+        self.train = train
+        self.images = preprocessed_images
+        if self.train:
+            self.masks = preprocessed_masks
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        image = self.images[idx]
+        mask = None
+        if self.train:
+           mask = self.masks[idx]
+        return (image ,mask)
 
 class Camelyon17(Dataset):
     def __init__(self, site, base_path=None, split='train', transform=None):
@@ -35,7 +59,7 @@ class Camelyon17(Dataset):
         self.paths, self.labels = data_dict[f'hospital{site}'][f'{split}']
 
         self.transform = transform
-        self.labels = self.labels.astype(np.long).squeeze()
+        self.labels = self.labels.astype(np.longlong).squeeze()
 
     def __len__(self):
         return self.paths.shape[0]
@@ -124,7 +148,7 @@ class Prostate(Dataset):
         self.images, self.labels = images, labels
         self.transform = transform
         self.channels = channels[site]
-        self.labels = self.labels.astype(np.long).squeeze()
+        self.labels = self.labels.astype(np.longlong).squeeze()
 
     def __len__(self):
         return self.images.shape[0]
@@ -224,7 +248,7 @@ class Brain(Dataset):
         self.images, self.labels = images, labels
         self.transform = transform
         self.channels = channels[site]
-        self.labels = self.labels.astype(np.long).squeeze()
+        self.labels = self.labels.astype(np.longlong).squeeze()
 
     def __len__(self):
         return self.images.shape[0]

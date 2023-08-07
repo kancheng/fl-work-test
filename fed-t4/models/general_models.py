@@ -49,7 +49,6 @@ class _Transition(nn.Sequential):
                                           kernel_size=1, stride=1, bias=False))
         self.add_module('pool', nn.AvgPool2d(kernel_size=2, stride=2))
 
-
 class DenseNet(nn.Module):
     """Densenet-BC model class, based on
     "Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
@@ -108,8 +107,6 @@ class DenseNet(nn.Module):
         out = torch.flatten(out, 1)
         out = self.classifier(out)
         return out
-
-
 
 class UNet(nn.Module):
     def __init__(self, input_shape, in_channels=3, out_channels=2, init_features=32):

@@ -16,7 +16,9 @@ def args_parser():
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
     parser.add_argument('--momentum', type=float, default=0.5, help="SGD momentum (default: 0.5)")
     parser.add_argument('--split', type=str, default='user', help="train-test split type, user or sample")
-    parser.add_argument('--num_users_info', type=bool, default=True, help="display of the number of users")
+    parser.add_argument('--num_users_info', type=bool, default=False, help="display of the number of users")
+    # imbalance
+    parser.add_argument('--imbalance', action='store_true', help='do not truncate train data to same length')
 
     # methods
     parser.add_argument('--methods', type=str, default='fedavg', help='methods name')

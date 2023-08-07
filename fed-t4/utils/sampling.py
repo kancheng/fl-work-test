@@ -19,7 +19,7 @@ def mnist_iid(dataset, num_users, num_users_info):
         dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
         if num_users_info:
-            print('num - ', i, ' : ', dict_users[i])
+            print('num - ', i, ' ; len ', len(dict_users[i]),' : ', dict_users[i])
     return dict_users
 
 
@@ -49,7 +49,7 @@ def mnist_noniid(dataset, num_users, num_users_info):
         for rand in rand_set:
             dict_users[i] = np.concatenate((dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
             if num_users_info:
-                print('num - ', i, ' : ', dict_users[i])
+                print('num - ', i, ' ; len ', len(dict_users[i]),' : ', dict_users[i])
     return dict_users
 
 
@@ -66,7 +66,7 @@ def cifar_iid(dataset, num_users, num_users_info):
         dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
         if num_users_info:
-            print('num - ', i, ' : ', dict_users[i])
+            print('num - ', i, ' ; len ', len(dict_users[i]),' : ', dict_users[i])
     return dict_users
 
 def exter_iid(dataset, num_users, num_users_info):
@@ -82,7 +82,7 @@ def exter_iid(dataset, num_users, num_users_info):
         dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
         if num_users_info:
-            print('num - ', i, ' : ', dict_users[i])
+            print('num - ', i, ' ; len ', len(dict_users[i]),' : ', dict_users[i])
     # print('num', i, ':', dict_users)
     return dict_users
 
@@ -99,7 +99,7 @@ def emnist_iid(dataset, num_users, num_users_info):
         dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
         if num_users_info:
-            print('num - ', i, ' : ', dict_users[i])
+            print('num - ', i, ' ; len ', len(dict_users[i]),' : ', dict_users[i])
     return dict_users
 
 if __name__ == '__main__':

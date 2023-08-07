@@ -4,8 +4,8 @@
 
 from libs import *
 from med_fed_train import *
-from loss import *
-from dataset import *
+from utils.loss import *
+from utils.dataset import *
 
 if __name__ == '__main__':
     # parse args
@@ -74,28 +74,6 @@ if __name__ == '__main__':
                                 mode='constant', 
                                 preserve_range=True)
         print('Salt Done!')
-
-        class saltIDDataset(torch.utils.data.Dataset):
-            def __init__(self,preprocessed_images, train=True, preprocessed_masks=None):
-                """
-                Args:
-                    text_file(string): path to text file
-                    root_dir(string): directory with all train images
-                """
-                self.train = train
-                self.images = preprocessed_images
-                if self.train:
-                    self.masks = preprocessed_masks
-
-            def __len__(self):
-                return len(self.images)
-
-            def __getitem__(self, idx):
-                image = self.images[idx]
-                mask = None
-                if self.train:
-                    mask = self.masks[idx]
-                return (image ,mask)
         X_train_shaped = X_train.reshape(-1, 1, 128, 128)/255
         Y_train_shaped = Y_train.reshape(-1, 1, 128, 128)
         X_train_shaped = X_train_shaped.astype(np.float32)
@@ -135,11 +113,27 @@ if __name__ == '__main__':
             exit('Error: only consider IID setting in CIFAR10')
     elif args.dataset == 'camelyon17':
         print('Camelyon17 Loading ...')
+        # python main_fed.py --dataset camelyon17
+        server_model, loss_fun, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_camelyon17(args)
+        print(server_model)
+        print(loss_fun)
+        print(init_dataset)
+        print(_1)
+        print(_2)
+        print(train_loaders)
+        print(val_loaders)
+        print(test_loaders)
+        exit('該功能正在測試中 ...')
     elif args.dataset == 'prostate':
         print('Prostate MRI Loading ...')
-    elif args.dataset == 'brain':
+        # python main_fed.py --dataset prostate 
+        server_model, loss_fun, init_dataset, _, _, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
+        exit('該功能正在測試中 ...')
+    elif args.dataset == 'brainfets2022':
         print('FeTS2022 (brain) Loading ...')
-        
+        # python main_fed.py --dataset brainfets2022 
+        server_model, loss_fun, init_dataset, _, _, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
+        exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
     

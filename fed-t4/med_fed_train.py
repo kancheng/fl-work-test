@@ -1,25 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python version: 3.10
+
 import sys, os
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# print( 'INFO. : THE BASE PATH : ', base_path)
 sys.path.append(base_path)
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.backends.cudnn as cudnn
 
-from dataset import Camelyon17, Prostate, Brain
-from loss import DiceLoss, JointLoss
-from models.general_models import DenseNet, UNet
-
-import argparse
-import time
-import copy
-import torchvision.transforms as transforms
-import random
-import math
+from libs import *
 
 def train_perturbation(args, model, data_loader, optimizer, loss_fun, device):
     model.to(device)
@@ -60,7 +48,7 @@ def train_perturbation(args, model, data_loader, optimizer, loss_fun, device):
     model.to('cpu')
     return loss, acc
 
-def test(args, model, data_loader, loss_fun, device):
+def test_med(args, model, data_loader, loss_fun, device):
     model.to(device)
     model.eval()
     loss_all = 0
@@ -145,9 +133,9 @@ def initialize_camelyon17(args):
             valset = valsets[idx]
             testset = testsets[idx]
 
-        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
-        val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.batch, shuffle=False))
-        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
+        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.local_bs, shuffle=True))
+        val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.local_bs, shuffle=False))
+        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.local_bs, shuffle=False))
     return model, loss_fun, sites, trainsets, testsets, train_loaders, val_loaders, test_loaders
 
 def initialize_prostate(args):
@@ -186,12 +174,12 @@ def initialize_prostate(args):
             valset = valsets[idx]
             testset = testsets[idx]
 
-        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
-        val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.batch, shuffle=False))
-        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
+        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.local_bs, shuffle=True))
+        val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.local_bs, shuffle=False))
+        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.local_bs, shuffle=False))
     return model, loss_fun, sites, trainsets, testsets, train_loaders, val_loaders, test_loaders
 
-def initialize_brain(args):
+def initialize_brain_fets(args):
     train_loaders, test_loaders = [], []
     val_loaders = []
     trainsets, testsets = [], []
@@ -227,7 +215,7 @@ def initialize_brain(args):
             valset = valsets[idx]
             testset = testsets[idx]
 
-        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
-        val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.batch, shuffle=False))
-        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
+        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.local_bs, shuffle=True))
+        val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.local_bs, shuffle=False))
+        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.local_bs, shuffle=False))
     return model, loss_fun, sites, trainsets, testsets, train_loaders, val_loaders, test_loaders
