@@ -54,11 +54,19 @@ class LocalUpdate(object):
                 # loss = nn.CrossEntropyLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 loss.backward()
                 optimizer.step()
-                if self.args.verbose and batch_idx % 10 == 0:
-                    print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                        iter, batch_idx * len(images), len(self.ldr_train.dataset),
-                               100. * batch_idx / len(self.ldr_train), loss.item()))
-                batch_loss.append(loss.item())
+                if batch_idx <= 10 :
+                    if self.args.verbose and batch_idx:
+                        print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                            iter, batch_idx * len(images), len(self.ldr_train.dataset),
+                                (( batch_idx * len(images) )/ len(self.ldr_train.dataset)), loss.item()))
+                               # 100. * batch_idx / len(self.ldr_train), loss.item()))
+                    batch_loss.append(loss.item())
+                else :
+                    if self.args.verbose and batch_idx % 10 == 0:
+                        print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                            iter, batch_idx * len(images), len(self.ldr_train.dataset),
+                                100. * batch_idx / len(self.ldr_train), loss.item()))
+                    batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))
         return net.state_dict(), sum(epoch_loss) / len(epoch_loss)
 
