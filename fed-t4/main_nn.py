@@ -56,6 +56,55 @@ if __name__ == '__main__':
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR100('./data/cifar100', train=True, transform=transform, target_transform=None, download=True)
         img_size = dataset_train[0][0].shape
+    elif args.dataset == 'salt':
+        path_train = './external/salt/train'
+        path_test = './external/salt/test'
+        # Set some parameters# Set s 
+        im_width = 128
+        im_height = 128
+        im_chan = 1
+        train_path_images = os.path.abspath(path_train + "/images/")
+        train_path_masks = os.path.abspath(path_train + "/masks/")
+
+        test_path_images = os.path.abspath(path_test + "/images/")
+        train_ids = next(os.walk(train_path_images))[2]
+        test_ids = next(os.walk(test_path_images))[2]
+        # Get and resize train images and masks
+        X_train = np.zeros((len(train_ids), im_height, im_width, im_chan), dtype=np.uint8)
+        Y_train = np.zeros((len(train_ids), im_height, im_width, 1), dtype=np.bool_)
+        print('Getting and resizing train images and masks ... ')
+        sys.stdout.flush()
+        for n, id_ in enumerate(train_ids):
+            img = cv2.imread(path_train + '/images/' + id_, cv2.IMREAD_UNCHANGED)
+            x = resize(img, (128, 128, 1), mode='constant', preserve_range=True)
+            X_train[n] = x
+            mask = cv2.imread(path_train + '/masks/' + id_, cv2.IMREAD_UNCHANGED)
+            Y_train[n] = resize(mask, (128, 128, 1), 
+                                mode='constant', 
+                                preserve_range=True)
+        print('Salt Done!')
+        X_train_shaped = X_train.reshape(-1, 1, 128, 128)/255
+        Y_train_shaped = Y_train.reshape(-1, 1, 128, 128)
+        X_train_shaped = X_train_shaped.astype(np.float32)
+        Y_train_shaped = Y_train_shaped.astype(np.float32)
+        torch.cuda.manual_seed_all(4200)
+        np.random.seed(133700)
+        indices = list(range(len(X_train_shaped)))
+        np.random.shuffle(indices)
+        val_size = 1/10
+        split = np.int_(np.floor(val_size * len(X_train_shaped)))
+        train_idxs = indices[split:]
+        salt_ID_dataset_train = saltIDDataset(X_train_shaped[train_idxs], 
+                                      train=True, 
+                                      preprocessed_masks=Y_train_shaped[train_idxs])
+        batch_size = args.local_bs
+        train_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_train, 
+                                                batch_size=batch_size, 
+                                                shuffle=True)
+        # done
+        dataset_train_pro = train_loader
+        dataset_train = salt_ID_dataset_train
+        train_features,train_labels = next(iter(dataset_train))
     else:
         exit('Error: unrecognized dataset')
 
@@ -70,6 +119,8 @@ if __name__ == '__main__':
         net_glob = Mnist_2NN(args=args).to(args.device)
     elif args.model == 'nn' and args.dataset == 'emnist':
         net_glob = Emnist_NN(args=args).to(args.device)
+    elif args.model == 'unet' and args.dataset == 'salt':
+        net_glob = Salt_UNet(args=args).to(args.device)
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:
@@ -80,7 +131,11 @@ if __name__ == '__main__':
     print(net_glob)
 
     # training
-    optimizer = optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum)
+    if args.model == 'unet' and args.dataset == 'salt':
+        optimizer = torch.optim.Adam(net_glob.parameters(), lr=args.lr)
+    else :
+        optimizer = torch.optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum)
+
     train_loader = DataLoader(dataset_train, batch_size=64, shuffle=True)
 
 
@@ -92,7 +147,10 @@ if __name__ == '__main__':
             data, target = data.to(args.device), target.to(args.device)
             optimizer.zero_grad()
             output = net_glob(data)
-            loss = F.cross_entropy(output, target)
+            if args.model == 'unet' and args.dataset == 'salt':
+                loss = nn.BCEWithLogitsLoss()(output, target)
+            else:
+                loss = F.cross_entropy(output, target)
             loss.backward()
             optimizer.step()
             if batch_idx % 50 == 0:
@@ -135,6 +193,47 @@ if __name__ == '__main__':
         transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
         dataset_test = datasets.EMNIST('./data/emnist/', split = 'digits', train=False, download=True, target_transform=None,  transform=transform)
         test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
+    elif args.dataset == 'salt':
+        path_test = './external/salt/test'
+        # Set some parameters# Set s 
+        im_width = 128
+        im_height = 128
+        im_chan = 1
+        test_path_images = os.path.abspath(path_test + "/images/")
+        test_ids = next(os.walk(test_path_images))[2]
+        # Get and resize train images and masks
+        X_test = np.zeros((len(test_ids), im_height, im_width, im_chan), dtype=np.uint8)
+        Y_test = np.zeros((len(test_ids), im_height, im_width, 1), dtype=np.bool_)
+        print('Getting and resizing train images and masks ... ')
+        sys.stdout.flush()
+        for n, id_ in enumerate(test_ids):
+            img = cv2.imread(path_test + '/images/' + id_, cv2.IMREAD_UNCHANGED)
+            x = resize(img, (128, 128, 1), mode='constant', preserve_range=True)
+            X_test[n] = x
+        print('Salt Done!')
+        X_test_shaped = X_test.reshape(-1, 1, 128, 128)/255
+        X_test_shaped = X_test_shaped.astype(np.float32)
+        torch.cuda.manual_seed_all(4200)
+        np.random.seed(133700)
+        indices = list(range(len(X_test_shaped)))
+        np.random.shuffle(indices)
+
+        val_size = 1/10
+        split = np.int_(np.floor(val_size * len(X_test_shaped)))
+
+        test_idxs = indices[split:]
+        salt_ID_dataset_test = saltIDDataset(X_test_shaped[test_idxs], 
+                                      train=True, 
+                                      preprocessed_masks=Y_test_shaped[test_idxs])
+        # batch_size = 16
+        batch_size = args.local_bs
+        test_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_test, 
+                                                batch_size=batch_size, 
+                                                shuffle=True)
+        # done
+        dataset_test_pro = test_loader
+        dataset_test = salt_ID_dataset_test
+
     else:
         exit('Error: unrecognized dataset')
 

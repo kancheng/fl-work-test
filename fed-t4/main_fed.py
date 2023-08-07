@@ -110,7 +110,13 @@ if __name__ == '__main__':
         if args.iid:
             dict_users = exter_iid(dataset_train, args.num_users, args.num_users_info)
         else:
-            exit('Error: only consider IID setting in CIFAR10')
+            exit('Error: only consider IID setting in the Salt Dataset.')
+    elif args.dataset == 'medicalmnist':
+        print('Medical MNIST Loading ...')
+        # medical_mnist
+        path_train = './external/medical_mnist_processed/train'
+        path_test = './external/medical_mnist_processed/test'
+        
     elif args.dataset == 'camelyon17':
         print('Camelyon17 Loading ...')
         # python main_fed.py --dataset camelyon17

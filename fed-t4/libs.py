@@ -5,11 +5,44 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import copy
-import numpy as np
-from torchvision import datasets, transforms
-import torch
 
+import os
+import sys
+import cv2
+import random
+import numpy as np
+import pandas as pd
+from PIL import Image
+from glob import glob
+from tqdm import tqdm
+import copy
+from copy import deepcopy
+import argparse
+import time
+import math
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import torch.backends.cudnn as cudnn
+import torch.optim as optim
+
+from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
+from torch.utils.data.sampler import RandomSampler
+from torch.autograd import Variable
+
+import torchvision
+import torchvision.transforms as transforms
+from torchvision import datasets, transforms
+
+from skimage.io import imread, imshow
+from skimage.transform import resize
+
+from utils.dataset import saltIDDataset, Camelyon17, Prostate, Brain
+from utils.loss import DiceLoss, JointLoss
+from models.general_models import DenseNet, UNet
 from utils.sampling import mnist_iid, mnist_noniid, cifar_iid, emnist_iid, exter_iid
 from utils.options import args_parser
 from models.Update import LocalUpdate
@@ -17,40 +50,3 @@ from models.Update import LocalUpdate
 from models.Nets import *
 from models.Fed import FedAvg
 from models.test import test_img
-
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
-import torch.optim as optim
-from torchvision import datasets, transforms
-
-import os
-import pandas as pd
-import cv2
-from tqdm import tqdm
-from copy import deepcopy
-
-import torch.nn as nn
-import torch.optim as optim
-import torch.backends.cudnn as cudnn
-
-import torchvision
-from torch.utils.data import Dataset
-from torch.autograd import Variable
-from torch.utils.data.sampler import RandomSampler
-
-from PIL import Image
-
-from glob import glob
-import sys
-import random
-from skimage.io import imread, imshow
-from skimage.transform import resize
-
-from utils.dataset import saltIDDataset, Camelyon17, Prostate, Brain
-from utils.loss import DiceLoss, JointLoss
-from models.general_models import DenseNet, UNet
-
-import argparse
-import time
-import torchvision.transforms as transforms
-import math
