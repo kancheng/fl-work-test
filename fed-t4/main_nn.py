@@ -24,7 +24,6 @@ def test(net_g, data_loader):
 
     return correct, test_loss
 
-
 if __name__ == '__main__':
     # parse args
     args = args_parser()
@@ -195,44 +194,6 @@ if __name__ == '__main__':
         test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
     elif args.dataset == 'salt':
         path_test = './external/salt/test'
-        # Set some parameters# Set s 
-        im_width = 128
-        im_height = 128
-        im_chan = 1
-        test_path_images = os.path.abspath(path_test + "/images/")
-        test_ids = next(os.walk(test_path_images))[2]
-        # Get and resize train images and masks
-        X_test = np.zeros((len(test_ids), im_height, im_width, im_chan), dtype=np.uint8)
-        Y_test = np.zeros((len(test_ids), im_height, im_width, 1), dtype=np.bool_)
-        print('Getting and resizing train images and masks ... ')
-        sys.stdout.flush()
-        for n, id_ in enumerate(test_ids):
-            img = cv2.imread(path_test + '/images/' + id_, cv2.IMREAD_UNCHANGED)
-            x = resize(img, (128, 128, 1), mode='constant', preserve_range=True)
-            X_test[n] = x
-        print('Salt Done!')
-        X_test_shaped = X_test.reshape(-1, 1, 128, 128)/255
-        X_test_shaped = X_test_shaped.astype(np.float32)
-        torch.cuda.manual_seed_all(4200)
-        np.random.seed(133700)
-        indices = list(range(len(X_test_shaped)))
-        np.random.shuffle(indices)
-
-        val_size = 1/10
-        split = np.int_(np.floor(val_size * len(X_test_shaped)))
-
-        test_idxs = indices[split:]
-        salt_ID_dataset_test = saltIDDataset(X_test_shaped[test_idxs], 
-                                      train=True, 
-                                      preprocessed_masks=Y_test_shaped[test_idxs])
-        # batch_size = 16
-        batch_size = args.local_bs
-        test_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_test, 
-                                                batch_size=batch_size, 
-                                                shuffle=True)
-        # done
-        dataset_test_pro = test_loader
-        dataset_test = salt_ID_dataset_test
 
     else:
         exit('Error: unrecognized dataset')

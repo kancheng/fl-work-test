@@ -236,12 +236,16 @@ if __name__ == '__main__':
     plt.figure()
     plt.plot(range(len(loss_train)), loss_train)
     plt.ylabel('train_loss')
-    plt.savefig('./save/fed_{}_{}_{}_C{}_iid{}_{}.png'.format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.methods))
+    plt.savefig('./save/fed_{}_{}_{}_C{}_iid_{}_{}.png'.format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.methods))
 
     # testing
     net_glob.eval()
-    acc_train, loss_train = test_img(net_glob, dataset_train, args)
-    acc_test, loss_test = test_img(net_glob, dataset_test, args)
+    if args.model == 'unet' and args.dataset == 'salt':
+        acc_train, loss_train = test_img(net_glob, dataset_train, args, type = 'bce')
+        acc_test, loss_test = test_img(net_glob, dataset_test, args, type = 'bce')
+    else:
+        acc_train, loss_train = test_img(net_glob, dataset_train, args, type = 'ce')
+        acc_test, loss_test = test_img(net_glob, dataset_test, args, type = 'ce')
     print("Training accuracy: {:.2f}".format(acc_train))
     print("Testing accuracy: {:.2f}".format(acc_test))
 
