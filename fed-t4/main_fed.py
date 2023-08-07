@@ -3,6 +3,9 @@
 # Python version: 3.10
 
 from libs import *
+from med_fed_train import *
+from loss import *
+from dataset import *
 
 if __name__ == '__main__':
     # parse args
@@ -130,6 +133,13 @@ if __name__ == '__main__':
             dict_users = exter_iid(dataset_train, args.num_users, args.num_users_info)
         else:
             exit('Error: only consider IID setting in CIFAR10')
+    elif args.dataset == 'camelyon17':
+        print('Camelyon17 Loading ...')
+    elif args.dataset == 'prostate':
+        print('Prostate MRI Loading ...')
+    elif args.dataset == 'brain':
+        print('FeTS2022 (brain) Loading ...')
+        
     else:
         exit('Error: unrecognized dataset')
     

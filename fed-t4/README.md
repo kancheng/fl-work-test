@@ -6,12 +6,21 @@ Only experiments on MNIST and CIFAR10 (both IID and non-IID) is produced by far.
 Note: The scripts will be slow without the implementation of parallel computing. 
 
 ## Requirements
+
 python>=3.6  
 pytorch>=0.4
 
 ```
 torch 2.0.1
 Python 3.10.11
+```
+## Env.
+
+**Build cython file**
+
+build cython file for amplitude normalization
+```bash
+python utils/setup.py build_ext --inplace
 ```
 
 ## Run
@@ -37,6 +46,7 @@ python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 5
 NB: for CIFAR-10, `num_channels` must be 3.
 
 ## Results
+
 ### MNIST
 Results are shown in Table 1 and Table 2, with the parameters C=0.1, B=10, E=5.
 

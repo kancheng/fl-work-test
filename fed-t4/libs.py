@@ -18,14 +18,10 @@ from models.Nets import *
 from models.Fed import FedAvg
 from models.test import test_img
 
-#######
-
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torch.optim as optim
 from torchvision import datasets, transforms
-
-######
 
 import os
 import pandas as pd
@@ -41,15 +37,9 @@ from torch.utils.data.sampler import RandomSampler
 
 from PIL import Image
 
-
 from glob import glob
 import sys
 import random
 from skimage.io import imread, imshow
 from skimage.transform import resize
-
-"""
-HarmoFL
-"""
-
 
