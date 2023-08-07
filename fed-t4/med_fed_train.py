@@ -125,13 +125,21 @@ def initialize_camelyon17(args):
     min_data_len = min([len(s) for s in trainsets])
     for idx in range(len(trainsets)):
         if args.imbalance:
+            # print('============== imbalance true ==============')
             trainset = trainsets[idx]
             valset = valsets[idx]
             testset = testsets[idx]
+            # print(len(trainset))
+            # print(len(valset))
+            # print(len(testset))
         else:
+            # print('============== imbalance false ==============')
             trainset = torch.utils.data.Subset(trainsets[idx], list(range(int(min_data_len))))
             valset = valsets[idx]
             testset = testsets[idx]
+            # print(len(trainset))
+            # print(len(valset))
+            # print(len(testset))
 
         train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.local_bs, shuffle=True))
         val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.local_bs, shuffle=False))

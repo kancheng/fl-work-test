@@ -114,6 +114,7 @@ if __name__ == '__main__':
     elif args.dataset == 'camelyon17':
         print('Camelyon17 Loading ...')
         # python main_fed.py --dataset camelyon17
+        # python main_fed.py --dataset camelyon17 --imbalance
         server_model, loss_fun, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_camelyon17(args)
         print(server_model)
         print(loss_fun)
@@ -127,12 +128,28 @@ if __name__ == '__main__':
     elif args.dataset == 'prostate':
         print('Prostate MRI Loading ...')
         # python main_fed.py --dataset prostate 
-        server_model, loss_fun, init_dataset, _, _, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
+        server_model, loss_fun, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
+        print(server_model)
+        print(loss_fun)
+        print(init_dataset)
+        print(_1)
+        print(_2)
+        print(train_loaders)
+        print(val_loaders)
+        print(test_loaders)
         exit('該功能正在測試中 ...')
     elif args.dataset == 'brainfets2022':
         print('FeTS2022 (brain) Loading ...')
-        # python main_fed.py --dataset brainfets2022 
-        server_model, loss_fun, init_dataset, _, _, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
+        # python main_fed.py --dataset brainfets2022
+        server_model, loss_fun, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
+        print(server_model)
+        print(loss_fun)
+        print(init_dataset)
+        print(_1)
+        print(_2)
+        print(train_loaders)
+        print(val_loaders)
+        print(test_loaders)
         exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
