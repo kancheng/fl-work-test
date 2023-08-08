@@ -243,9 +243,42 @@ if __name__ == '__main__':
             loss_avg = sum(loss_locals) / len(loss_locals)
             print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
             loss_train.append(loss_avg)
-    # elif args.methods == 'harmofl':
-    #     print('Testing ...')
-
+    elif args.methods == 'harmofl':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'feddc':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'feddyn':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'scaffold':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'fedprox':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'fedtp':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'fedsr':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'moon':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'fedbn':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'fedadam':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'fednova':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
+    elif args.methods == 'groundtruth':
+        print('Testing ...')
+        exit('該功能正在測試中 ...')
     # plot loss curve
     plt.figure()
     plt.plot(range(len(loss_train)), loss_train)

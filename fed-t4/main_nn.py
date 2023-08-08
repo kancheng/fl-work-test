@@ -7,7 +7,7 @@ from med_fed_train import *
 from utils.loss import *
 from utils.dataset import *
 
-def test(net_g, data_loader):
+def test(net_g, data_loader, type='ce'):
     # testing
     net_g.eval()
     test_loss = 0
@@ -16,7 +16,12 @@ def test(net_g, data_loader):
     for idx, (data, target) in enumerate(data_loader):
         data, target = data.to(args.device), target.to(args.device)
         log_probs = net_g(data)
-        test_loss += F.cross_entropy(log_probs, target).item()
+        # test_loss += F.cross_entropy(log_probs, target).item()
+        if type == 'ce':
+            test_loss += F.cross_entropy(log_probs, target).item()
+        elif type == 'bce':
+            # BCEWithLogitsLoss
+            test_loss += F.binary_cross_entropy_with_logits(log_probs, target).item()
         y_pred = log_probs.data.max(1, keepdim=True)[1]
         correct += y_pred.eq(target.data.view_as(y_pred)).long().cpu().sum()
 
@@ -169,7 +174,8 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             output = net_glob(data)
             if args.model == 'unet' and args.dataset == 'salt':
-                loss = nn.BCEWithLogitsLoss()(output, target)
+                # loss = nn.BCEWithLogitsLoss()(output, target)
+                loss = F.binary_cross_entropy_with_logits(output, target)
             else:
                 loss = F.cross_entropy(output, target)
             loss.backward()
@@ -221,4 +227,4 @@ if __name__ == '__main__':
         exit('Error: unrecognized dataset')
 
     print('test on', len(dataset_test), 'samples')
-    test_acc, test_loss = test(net_glob, test_loader)
+    test_acc, test_loss = test(net_glob, test_loader , type='ce')
