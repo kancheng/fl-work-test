@@ -50,3 +50,4 @@ from models.Update import LocalUpdate
 from models.Nets import *
 from models.Fed import FedAvg
 from models.test import *
+from models.train import *

@@ -7,6 +7,7 @@ from torch import nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
+import numpy as np
 
 def test_img_classification(net_g, datatest, args, type = 'ce'):
     net_g.eval()
@@ -77,6 +78,7 @@ def test_img_segmentation(model, device, testloader, loss_function, best_iou):
     running_loss = 0
     # mask_list, iou  = [], []
     iou = []
+    testloader = DataLoader(testloader, batch_size=1)
     with torch.no_grad():
         for i, (input, mask) in enumerate(testloader):
             input, mask = input.to(device), mask.to(device)

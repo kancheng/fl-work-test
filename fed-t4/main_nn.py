@@ -66,6 +66,7 @@ if __name__ == '__main__':
         train_path_masks = os.path.abspath(path_train + "/masks/")
 
         test_path_images = os.path.abspath(path_test + "/images/")
+        test_path_masks = os.path.abspath(path_test + "/masks/")
         train_ids = next(os.walk(train_path_images))[2]
         test_ids = next(os.walk(test_path_images))[2]
         # Get and resize train images and masks
@@ -90,12 +91,18 @@ if __name__ == '__main__':
         np.random.seed(133700)
         indices = list(range(len(X_train_shaped)))
         np.random.shuffle(indices)
+
         val_size = 1/10
         split = np.int_(np.floor(val_size * len(X_train_shaped)))
+
         train_idxs = indices[split:]
+        val_idxs = indices[:split]
         salt_ID_dataset_train = saltIDDataset(X_train_shaped[train_idxs], 
                                       train=True, 
                                       preprocessed_masks=Y_train_shaped[train_idxs])
+        salt_ID_dataset_val = saltIDDataset(X_train_shaped[val_idxs], 
+                                            train=True, 
+                                            preprocessed_masks=Y_train_shaped[val_idxs])
         batch_size = args.local_bs
         train_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_train, 
                                                 batch_size=batch_size, 
@@ -103,7 +110,11 @@ if __name__ == '__main__':
         # done
         dataset_train_pro = train_loader
         dataset_train = salt_ID_dataset_train
-        train_features,train_labels = next(iter(dataset_train))
+        val_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_val, 
+                                                batch_size=batch_size, 
+                                                shuffle=False)
+        dataset_test_pro = val_loader
+        dataset_test = salt_ID_dataset_val
     else:
         exit('Error: unrecognized dataset')
 
