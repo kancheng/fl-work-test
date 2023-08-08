@@ -7,14 +7,80 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 import numpy as np
 from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
+
 from PIL import Image
 import SimpleITK as sitk
 import random
 import cv2
 import torch
+from torchvision import datasets, transforms
 import torchvision.transforms as transforms
 
 # np.long -> np.longlong
+
+# Training transforms
+def get_train_transform(image_size):
+    train_transform = transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+        transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
+            )
+    ])
+    return train_transform
+
+# Validation transforms
+def get_valid_transform(image_size):
+    valid_transform = transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
+            )
+    ])
+    return valid_transform
+
+def get_datasets( train_dir, valid_dir, image_size):
+    """
+    Function to prepare the Datasets.
+
+    Returns the training and validation datasets along 
+    with the class names.
+    """
+    dataset_train = datasets.ImageFolder(
+        train_dir, 
+        transform=(get_train_transform(image_size))
+    )
+    dataset_valid = datasets.ImageFolder(
+        valid_dir, 
+        transform=(get_valid_transform(image_size))
+    )
+    return dataset_train, dataset_valid, dataset_train.classes
+
+def get_data_loaders(dataset_train, dataset_valid, bs, nw):
+    """
+    Prepares the training and validation data loaders.
+
+    :param dataset_train: The training dataset.
+    :param dataset_valid: The validation dataset.
+
+    Returns the training and validation data loaders.
+    """
+    train_loader = DataLoader(
+        dataset_train, batch_size=bs, 
+        shuffle=True, num_workers=nw
+    )
+    valid_loader = DataLoader(
+        dataset_valid, batch_size=bs, 
+        shuffle=False, num_workers=nw
+    )
+    return train_loader, valid_loader 
 
 def convert_from_nii_to_png(img):
     high = np.quantile(img,0.99)

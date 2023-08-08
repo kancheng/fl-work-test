@@ -256,7 +256,7 @@ class Emnist_NN(nn.Module):
 
 
 class MedicalMNISTCNN(nn.Module):
-    def __init__(self, num_classes=None):
+    def __init__(self, args):
         super(MedicalMNISTCNN, self).__init__()
         self.conv_block = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3),
@@ -276,7 +276,7 @@ class MedicalMNISTCNN(nn.Module):
         self.classifier = nn.Sequential(
             nn.Linear(in_features=256, out_features=128),
             nn.Dropout2d(p=0.4),
-            nn.Linear(in_features=128, out_features=num_classes)
+            nn.Linear(in_features=128, out_features=args.num_classes)
         )
 
     def forward(self, x):

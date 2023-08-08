@@ -99,7 +99,6 @@ if __name__ == '__main__':
         train_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_train, 
                                                 batch_size=batch_size, 
                                                 shuffle=True)
-        # done
         dataset_train_pro = train_loader
         dataset_train = salt_ID_dataset_train
         val_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_val, 
@@ -116,9 +115,20 @@ if __name__ == '__main__':
     elif args.dataset == 'medicalmnist':
         print('Medical MNIST Loading ...')
         # medical_mnist
-        path_train = './external/medical_mnist_processed/train'
-        path_test = './external/medical_mnist_processed/test'
-        
+        train_dir = './external/medical-mnist/medical_mnist_processed/train'
+        valid_dir = './external/medical-mnist/medical_mnist_processed/test'
+        image_size = 224 # Image size of resize when applying transforms.
+        batch_size = args.local_bs # 64
+        num_workers = 4 # Number of parallel processes for data preparation.
+        dataset_train, dataset_valid, dataset_classes = get_datasets( train_dir, valid_dir, image_size)
+        dataset_train, dataset_test = get_data_loaders(dataset_train, dataset_valid, batch_size, num_workers)
+        # print(dataset_train)
+        # print(dataset_test)
+        if args.iid:
+            dict_users = exter_iid(dataset_train, args.num_users, args.num_users_info)
+        else:
+            exit('Error: only consider IID setting in Medical MNIST.')
+        # exit('該功能正在測試中 ...')
     elif args.dataset == 'camelyon17':
         print('Camelyon17 Loading ...')
         # python main_fed.py --dataset camelyon17
@@ -162,8 +172,8 @@ if __name__ == '__main__':
     else:
         exit('Error: unrecognized dataset')
     
-    if args.dataset == 'salt':
-        train_features,train_labels = next(iter(dataset_train))
+    if args.dataset == 'salt' or args.dataset == 'medicalmnist':
+        train_features, train_labels = next(iter(dataset_train))
     else:
         img_size = dataset_train[0][0].shape
 
@@ -180,6 +190,8 @@ if __name__ == '__main__':
         net_glob = Emnist_NN(args=args).to(args.device)
     elif args.model == 'unet' and args.dataset == 'salt':
         net_glob = Salt_UNet(args=args).to(args.device)
+    elif args.model == 'medcnn' and args.dataset == 'medicalmnist':
+        net_glob = MedicalMNISTCNN(args=args).to(args.device)
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:
@@ -245,10 +257,10 @@ if __name__ == '__main__':
     if args.model == 'unet' and args.dataset == 'salt':
         acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'bce')
         acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'bce')
-
-        criterion = nn.BCEWithLogitsLoss()
-        test_loss, test_iou = test_img_segmentation(net_glob, args.device, dataset_test, criterion, best_iou = -1)
-        print(f'| Valid loss: {test_loss:.3f} | Valid IoU: {test_iou:.3f} ')
+        # best_iou = -1
+        # criterion = nn.BCEWithLogitsLoss()
+        # test_loss, test_iou = test_img_segmentation(net_glob, args.device, dataset_test, criterion, best_iou)
+        # print(f'| Valid loss: {test_loss:.3f} | Valid IoU: {test_iou:.3f} ')
     else:
         acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'ce')
         acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'ce')

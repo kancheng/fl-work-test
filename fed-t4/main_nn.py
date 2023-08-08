@@ -3,6 +3,9 @@
 # Python version: 3.10
 
 from libs import *
+from med_fed_train import *
+from utils.loss import *
+from utils.dataset import *
 
 def test(net_g, data_loader):
     # testing
@@ -115,6 +118,14 @@ if __name__ == '__main__':
                                                 shuffle=False)
         dataset_test_pro = val_loader
         dataset_test = salt_ID_dataset_val
+    elif args.dataset == 'medicalmnist':
+        train_dir = './external/medical-mnist/medical_mnist_processed/train'
+        valid_dir = './external/medical-mnist/medical_mnist_processed/test'
+        image_size = 224 # Image size of resize when applying transforms.
+        batch_size = args.local_bs # 64
+        num_workers = 4 # Number of parallel processes for data preparation.
+        dataset_train, dataset_valid, dataset_classes = get_datasets( train_dir, valid_dir, image_size)
+        dataset_train, dataset_test = get_data_loaders(dataset_train, dataset_valid, batch_size, num_workers)
     else:
         exit('Error: unrecognized dataset')
 
