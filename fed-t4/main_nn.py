@@ -7,31 +7,6 @@ from med_fed_train import *
 from utils.loss import *
 from utils.dataset import *
 
-def test(net_g, data_loader, type='ce'):
-    # testing
-    net_g.eval()
-    test_loss = 0
-    correct = 0
-    l = len(data_loader)
-    for idx, (data, target) in enumerate(data_loader):
-        data, target = data.to(args.device), target.to(args.device)
-        log_probs = net_g(data)
-        # test_loss += F.cross_entropy(log_probs, target).item()
-        if type == 'ce':
-            test_loss += F.cross_entropy(log_probs, target).item()
-        elif type == 'bce':
-            # BCEWithLogitsLoss
-            test_loss += F.binary_cross_entropy_with_logits(log_probs, target).item()
-        y_pred = log_probs.data.max(1, keepdim=True)[1]
-        correct += y_pred.eq(target.data.view_as(y_pred)).long().cpu().sum()
-
-    test_loss /= len(data_loader.dataset)
-    print('\nTest set: Average loss: {:.4f} \nAccuracy: {}/{} ({:.2f}%)\n'.format(
-        test_loss, correct, len(data_loader.dataset),
-        100. * correct / len(data_loader.dataset)))
-
-    return correct, test_loss
-
 if __name__ == '__main__':
     # parse args
     args = args_parser()
@@ -121,8 +96,7 @@ if __name__ == '__main__':
         val_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_val, 
                                                 batch_size=batch_size, 
                                                 shuffle=False)
-        dataset_test_pro = val_loader
-        dataset_test = salt_ID_dataset_val
+
     elif args.dataset == 'medicalmnist':
         train_dir = './external/medical-mnist/medical_mnist_processed/train'
         valid_dir = './external/medical-mnist/medical_mnist_processed/test'
@@ -162,7 +136,9 @@ if __name__ == '__main__':
     else :
         optimizer = torch.optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum)
 
-    train_loader = DataLoader(dataset_train, batch_size=64, shuffle=True)
+    # train_loader = DataLoader(dataset_train, batch_size=1, shuffle=True)
+    train_loader = DataLoader(dataset_train, batch_size=args.local_bs, shuffle=True)
+    
 
 
     list_loss = []
@@ -222,9 +198,16 @@ if __name__ == '__main__':
         test_loader = DataLoader(dataset_test, batch_size=1000, shuffle=False)
     elif args.dataset == 'salt':
         path_test = './external/salt/test'
-
+        dataset_test = salt_ID_dataset_val
     else:
         exit('Error: unrecognized dataset')
 
     print('test on', len(dataset_test), 'samples')
-    test_acc, test_loss = test(net_glob, test_loader , type='ce')
+    if args.dataset == 'salt':
+        # test_acc, test_loss = test_local(net_glob, val_loader , type='bce')
+        criterion = nn.BCEWithLogitsLoss()
+        test_loss, test_iou = test_local_segmentation(net_glob, args.device, dataset_test, criterion)
+        print(f'Valid loss: {test_loss:.3f} | Valid IoU: {test_iou:.3f} ')
+    else :
+        test_acc, test_loss = test_local_classification(net_glob, test_loader, args, type='ce')
+

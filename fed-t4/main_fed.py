@@ -288,15 +288,14 @@ if __name__ == '__main__':
     # testing
     net_glob.eval()
     if args.model == 'unet' and args.dataset == 'salt':
-        acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'bce')
-        acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'bce')
-        # best_iou = -1
-        # criterion = nn.BCEWithLogitsLoss()
-        # test_loss, test_iou = test_img_segmentation(net_glob, args.device, dataset_test, criterion, best_iou)
-        # print(f'| Valid loss: {test_loss:.3f} | Valid IoU: {test_iou:.3f} ')
+        criterion = nn.BCEWithLogitsLoss()
+        train_loss, train_iou = test_img_segmentation(net_glob, args.device, dataset_train, criterion)
+        test_loss, test_iou = test_img_segmentation(net_glob, args.device, dataset_test, criterion)
+        print(f'Train - Valid loss: {train_loss:.3f} | Train - Valid IoU: {train_iou:.3f} ')
+        print(f'Test - Valid loss: {test_loss:.3f} | Test - Valid IoU: {test_iou:.3f} ')
     else:
         acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'ce')
         acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'ce')
-    print("Training accuracy: {:.2f}".format(acc_train))
-    print("Testing accuracy: {:.2f}".format(acc_test))
+        print("Training accuracy: {:.2f}".format(acc_train))
+        print("Testing accuracy: {:.2f}".format(acc_test))
 

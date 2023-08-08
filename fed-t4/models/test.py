@@ -36,8 +36,6 @@ def test_img_classification(net_g, datatest, args, type = 'ce'):
     test_loss /= len(data_loader.dataset)
 
     accuracy = 100.00 * correct / len(data_loader.dataset)
-    # print('\nTest set: Average loss: {:.4f} \nAccuracy: {}/{} ({:.2f}%)\n'.format(
-    #     test_loss, correct, len(data_loader.dataset), accuracy))
     if args.verbose:
         print('\nTest set: Average loss: {:.4f} \nAccuracy: {}/{} ({:.2f}%)\n'.format(
             test_loss, correct, len(data_loader.dataset), accuracy))
@@ -73,7 +71,7 @@ def get_iou_score(outputs, labels):
     iou = (intersection + 1e-6) / (union + 1e-6)  
     return iou.cpu().detach().numpy()
 
-def test_img_segmentation(model, device, testloader, loss_function, best_iou):
+def test_img_segmentation(model, device, testloader, loss_function):
     model.eval()
     running_loss = 0
     # mask_list, iou  = [], []
@@ -93,12 +91,10 @@ def test_img_segmentation(model, device, testloader, loss_function, best_iou):
             if ((i + 1) % 1) == 0:
                 pred = normtensor(predict[0])
                 img, pred, mak = tensor2np(input[0]), tensor2np(pred), tensor2np(mask[0])
-                # mask_list.append(wandb_mask(img, pred, mak))
 
     test_loss = running_loss/len(testloader)
     mean_iou = np.mean(iou)
-    # wandb.log({'Valid loss': test_loss, 'Valid IoU': mean_iou, 'Prediction': mask_list})
-    
+
     # if mean_iou>best_iou:
     # # export to onnx + pt
     #     try:
@@ -109,3 +105,58 @@ def test_img_segmentation(model, device, testloader, loss_function, best_iou):
 
     return test_loss, mean_iou
 
+def test_local_classification(net_g, data_loader, args, type='ce'):
+    # testing
+    net_g.eval()
+    test_loss = 0
+    correct = 0
+    l = len(data_loader)
+    for idx, (data, target) in enumerate(data_loader):
+        data, target = data.to(args.device), target.to(args.device)
+        log_probs = net_g(data)
+        # test_loss += F.cross_entropy(log_probs, target).item()
+        if type == 'ce':
+            test_loss += F.cross_entropy(log_probs, target).item()
+        elif type == 'bce':
+            # BCEWithLogitsLoss
+            test_loss += F.binary_cross_entropy_with_logits(log_probs, target).item()
+        y_pred = log_probs.data.max(1, keepdim=True)[1]
+        correct += y_pred.eq(target.data.view_as(y_pred)).long().cpu().sum()
+    test_loss /= len(data_loader.dataset)
+    print('\nTest set: Average loss: {:.4f} \nAccuracy: {}/{} ({:.2f}%)\n'.format(
+        test_loss, correct, len(data_loader.dataset),
+        100. * correct / len(data_loader.dataset)))
+    return correct, test_loss
+
+def test_local_segmentation(model, device, testloader, loss_function):
+    model.eval()
+    running_loss = 0
+    iou = []
+    testloader = DataLoader(testloader, batch_size=1)
+    with torch.no_grad():
+        for i, (input, mask) in enumerate(testloader):
+            input, mask = input.to(device), mask.to(device)
+
+            predict = model(input)
+            loss = loss_function(predict, mask)
+
+            running_loss += loss.item()
+            iou.append(get_iou_score(predict, mask).mean())
+
+            # log the first image of the batch
+            if ((i + 1) % 1) == 0:
+                pred = normtensor(predict[0])
+                img, pred, mak = tensor2np(input[0]), tensor2np(pred), tensor2np(mask[0])
+
+    test_loss = running_loss/len(testloader)
+    mean_iou = np.mean(iou)
+
+    # if mean_iou>best_iou:
+    # # export to onnx + pt
+    #     try:
+    #         torch.onnx.export(model, input, SAVE_PATH + RUN_NAME + '.onnx')
+    #         torch.save(model.state_dict(), SAVE_PATH + RUN_NAME + '.pth')
+    #     except:
+    #         print('Can export weights')
+
+    return test_loss, mean_iou

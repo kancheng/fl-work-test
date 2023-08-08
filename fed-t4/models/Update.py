@@ -24,23 +24,23 @@ class DatasetSplit(Dataset):
         image, label = self.dataset[self.idxs[item]]
         return image, label
 
-class DatasetSplit2(Dataset):
-    def __init__(self, dataset, idxs):
-        self.dataset = dataset
-        self.idxs = list(idxs)
-        # print('DatasetSplit idx', idxs, self.idxs)
+# class DatasetSplit2(Dataset):
+#     def __init__(self, dataset, idxs):
+#         self.dataset = dataset
+#         self.idxs = list(idxs)
+#         # print('DatasetSplit idx', idxs, self.idxs)
 
-    def __len__(self):
-        # print('len', len(self.idxs), self.idxs)
-        return len(self.idxs)
+#     def __len__(self):
+#         # print('len', len(self.idxs), self.idxs)
+#         return len(self.idxs)
 
-    def __getitem__(self, item):
-        # print('__getitem__', item, self.idxs[item])
-        # image, label = self.dataset[self.idxs[item]]
-        for image, label in iter(self.dataset):
-            print("image:\t", image)
-            print("label:\t", label)
-        return image, label
+#     def __getitem__(self, item):
+#         # print('__getitem__', item, self.idxs[item])
+#         # image, label = self.dataset[self.idxs[item]]
+#         for image, label in iter(self.dataset):
+#             print("image:\t", image)
+#             print("label:\t", label)
+#         return image, label
     
 
 class LocalUpdate(object):
@@ -52,10 +52,11 @@ class LocalUpdate(object):
         # self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=self.args.local_bs, shuffle=True)
         # 分組後只要讀進來就好，就不用再拆了。所以 batch_size=1。
         # https://pytorch.org/docs/stable/data.html
-        if args.model == 'medcnn' and args.dataset == 'medicalmnist':
-            self.ldr_train = DataLoader(DatasetSplit2(dataset, idxs), batch_size=1)
-        else :
-            self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=1)
+        # if args.model == 'medcnn' and args.dataset == 'medicalmnist':
+        #     self.ldr_train = DataLoader(DatasetSplit2(dataset, idxs), batch_size=1)
+        # else :
+        #     self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=1)
+        self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=1)
         # print(idxs)
         # print('ldr_train',len(self.ldr_train),self.ldr_train)
 
