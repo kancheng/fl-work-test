@@ -13,11 +13,14 @@ class DatasetSplit(Dataset):
     def __init__(self, dataset, idxs):
         self.dataset = dataset
         self.idxs = list(idxs)
+        # print('DatasetSplit idx', idxs, self.idxs)
 
     def __len__(self):
+        # print('len', len(self.idxs), self.idxs)
         return len(self.idxs)
 
     def __getitem__(self, item):
+        # print('__getitem__', item, self.idxs[item])
         image, label = self.dataset[self.idxs[item]]
         return image, label
 
@@ -27,7 +30,13 @@ class LocalUpdate(object):
         self.args = args
         self.loss_func = nn.CrossEntropyLoss()
         self.selected_clients = []
-        self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=self.args.local_bs, shuffle=True)
+        # salt batch_size = 1
+        # self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=self.args.local_bs, shuffle=True)
+        # 分組後只要讀進來就好，就不用再拆了。所以 batch_size=1。
+        # https://pytorch.org/docs/stable/data.html
+        self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=1)
+        # print(idxs)
+        # print('ldr_train',len(self.ldr_train),self.ldr_train)
 
     def train(self, net):
         net.train()
@@ -41,6 +50,7 @@ class LocalUpdate(object):
         for iter in range(self.args.local_ep):
             batch_loss = []
             for batch_idx, (images, labels) in enumerate(self.ldr_train):
+                # print('batch_idx',batch_idx)
                 images, labels = images.to(self.args.device), labels.to(self.args.device)
                 net.zero_grad()
                 log_probs = net(images)
@@ -54,19 +64,6 @@ class LocalUpdate(object):
                 # loss = nn.CrossEntropyLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 loss.backward()
                 optimizer.step()
-                # if batch_idx <= 10 :
-                #     if self.args.verbose and batch_idx:
-                #         print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                #             iter, batch_idx * len(images), len(self.ldr_train.dataset),
-                #                 (( batch_idx * len(images) )/ len(self.ldr_train.dataset)), loss.item()))
-                #                # 100. * batch_idx / len(self.ldr_train), loss.item()))
-                #     batch_loss.append(loss.item())
-                # else :
-                #     if self.args.verbose and batch_idx % 10 == 0:
-                #         print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                #             iter, batch_idx * len(images), len(self.ldr_train.dataset),
-                #                 100. * batch_idx / len(self.ldr_train), loss.item()))
-                #     batch_loss.append(loss.item())
                 if self.args.verbose and batch_idx % 10 == 0:
                     print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         iter, batch_idx * len(images), len(self.ldr_train.dataset),

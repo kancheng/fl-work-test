@@ -109,6 +109,8 @@ if __name__ == '__main__':
         dataset_test = salt_ID_dataset_val
         if args.iid:
             dict_users = exter_iid(dataset_train, args.num_users, args.num_users_info)
+            print(dict_users)
+            print(len(dict_users))
         else:
             exit('Error: only consider IID setting in the Salt Dataset.')
     elif args.dataset == 'medicalmnist':
