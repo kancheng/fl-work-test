@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 
-def test_img(net_g, datatest, args, type = 'ce'):
+def test_img_classification(net_g, datatest, args, type = 'ce'):
     net_g.eval()
     # testing
     test_loss = 0
@@ -72,7 +72,7 @@ def get_iou_score(outputs, labels):
     iou = (intersection + 1e-6) / (union + 1e-6)  
     return iou.cpu().detach().numpy()
 
-def test_seg(model, device, testloader, loss_function, best_iou):
+def test_img_segmentation(model, device, testloader, loss_function, best_iou):
     model.eval()
     running_loss = 0
     # mask_list, iou  = [], []
