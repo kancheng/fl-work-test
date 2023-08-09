@@ -24,7 +24,6 @@ class MLP(nn.Module):
         x = self.layer_hidden(x)
         return x
 
-
 class CNNMnist(nn.Module):
     def __init__(self, args):
         super(CNNMnist, self).__init__()
@@ -42,7 +41,6 @@ class CNNMnist(nn.Module):
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return x
-
 
 class CNNCifar(nn.Module):
     def __init__(self, args):
@@ -95,6 +93,7 @@ class Decoder(nn.Module):
         x1 = torch.cat((x1, x2), dim=1)
         x1 = self.conv_relu(x1)
         return x1
+
 class Ext_UNet(nn.Module):
     def __init__(self, args):
         super().__init__()
@@ -253,7 +252,6 @@ class Emnist_NN(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-
 
 class MedicalMNISTCNN(nn.Module):
     def __init__(self, args):
