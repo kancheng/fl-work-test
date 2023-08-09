@@ -46,6 +46,7 @@ from models.general_models import DenseNet, UNet
 # from utils.sampling import mnist_iid, mnist_noniid, cifar_iid, emnist_iid, exter_iid
 from utils.sampling import *
 from utils.options import args_parser
+from utils.weight_perturbation import *
 from models.Update import LocalUpdate
 # from models.Nets import MLP, CNNMnist, CNNCifar, CNNCifar100, Mnist_2NN, UNet, Emnist_NN, Salt_UNet
 from models.Nets import *

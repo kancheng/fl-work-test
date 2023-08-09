@@ -12,6 +12,8 @@ if __name__ == '__main__':
     args = args_parser()
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
     args.log = True
+    # setting
+    loss_func_val = nn.CrossEntropyLoss()
     # load dataset and split users
     if args.dataset == 'mnist':
         trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
@@ -128,25 +130,32 @@ if __name__ == '__main__':
             exit('Error: only consider IID setting in Medical MNIST.')
         # exit('該功能正在測試中 ...')
     elif args.dataset == 'camelyon17':
+        args.model = 'hfl'
         print('Camelyon17 Loading ...')
-        # python main_fed.py --dataset camelyon17
+        # python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 128
         # python main_fed.py --dataset camelyon17 --imbalance
-        server_model, loss_fun, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_camelyon17(args)
-        print(server_model)
-        print(loss_fun)
+        # python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 5 --gpu 0 --methods harmofl
+        net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_camelyon17(args)
+        args.num_users = len(init_dataset)
+        # federated client number
+        client_num = args.num_users
+        client_weights = [1./client_num for i in range(client_num)]
+        print(net_glob)
+        print(loss_func_val)
         print(init_dataset)
-        print(_1)
-        print(_2)
         print(train_loaders)
         print(val_loaders)
         print(test_loaders)
-        exit('該功能正在測試中 ...')
+        # exit('該功能正在測試中 ...')
     elif args.dataset == 'prostate':
+        args.model = 'hfl'
         print('Prostate MRI Loading ...')
         # python main_fed.py --dataset prostate 
-        server_model, loss_fun, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
-        print(server_model)
-        print(loss_fun)
+        net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
+        args.num_users = len(init_dataset)
+        client_num = args.num_users
+        print(net_glob)
+        print(loss_func_val)
         print(init_dataset)
         print(_1)
         print(_2)
@@ -155,11 +164,14 @@ if __name__ == '__main__':
         print(test_loaders)
         exit('該功能正在測試中 ...')
     elif args.dataset == 'brainfets2022':
+        args.model = 'hfl'
         print('FeTS2022 (brain) Loading ...')
         # python main_fed.py --dataset brainfets2022
-        server_model, loss_fun, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
-        print(server_model)
-        print(loss_fun)
+        net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
+        args.num_users = len(init_dataset)
+        client_num = args.num_users
+        print(net_glob)
+        print(loss_func_val)
         print(init_dataset)
         print(_1)
         print(_2)
@@ -169,12 +181,16 @@ if __name__ == '__main__':
         exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
-    
-    if args.dataset == 'salt' or args.dataset == 'medicalmnist':
-        train_features, train_labels = next(iter(dataset_train))
-    else:
-        img_size = dataset_train[0][0].shape
 
+    # federated client number
+    client_num = args.num_users
+    client_weights = [1./client_num for i in range(client_num)]
+    
+    # if args.dataset == 'salt' or args.dataset == 'medicalmnist':
+    #     train_features, train_labels = next(iter(dataset_train))
+    if args.model == 'mlp':
+        img_size = dataset_train[0][0].shape
+    
     # build model
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = CNNCifar(args=args).to(args.device)
@@ -190,6 +206,15 @@ if __name__ == '__main__':
         net_glob = Salt_UNet(args=args).to(args.device)
     elif args.model == 'medcnn' and args.dataset == 'medicalmnist':
         net_glob = MedicalMNISTCNN(args=args).to(args.device)
+    elif args.dataset == 'camelyon17':
+        print('Loading ...')
+        # exit('該功能正在測試中 ...')
+    elif args.dataset == 'prostate':
+        print('Loading ...')
+        exit('該功能正在測試中 ...')
+    elif args.dataset == 'brainfets2022':
+        print('Loading ...')
+        exit('該功能正在測試中 ...')
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:
@@ -210,91 +235,66 @@ if __name__ == '__main__':
     net_best = None
     best_loss = None
     val_acc_list, net_list = [], []
-
+    
     if args.all_clients: 
         print("Aggregation over all clients")
         w_locals = [w_glob for i in range(args.num_users)]
     # Mutli. Fed.    
-    if args.methods == 'fedavg':
-        for iter in range(args.epochs):
-            loss_locals = []
-            if not args.all_clients:
-                w_locals = []
-            m = max(int(args.frac * args.num_users), 1)
-            idxs_users = np.random.choice(range(args.num_users), m, replace=False)
-            for idx in idxs_users:
-                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-                if args.all_clients:
-                    w_locals[idx] = copy.deepcopy(w)
-                else:
-                    w_locals.append(copy.deepcopy(w))
-                loss_locals.append(copy.deepcopy(loss))
-            # update global weights
-            w_glob = FedAvg(w_locals)
-            # copy weight to net_glob
+    
+    for iter in range(args.epochs):
+        loss_locals = []
+        if not args.all_clients:
+            models = []
+        m = max(int(args.frac * args.num_users), 1)
+        idxs_users = np.random.choice(range(args.num_users), m, replace=False)
+        for idx in idxs_users:
+            if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
+                local = LocalUpdate(args=args, dataset= _1[idx], idxs=None,loss_func=loss_func_val, lu_loader = train_loaders[idx])
+            else:
+                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx],loss_func=loss_func_val)
+            model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+            if args.all_clients:
+                models[idx] = copy.deepcopy(model)
+            else:
+                models.append(copy.deepcopy(model))
+            loss_locals.append(copy.deepcopy(loss))
+        # update global weights
+        if args.methods == 'fedavg':
+            w_glob = FedAvg(models)
             net_glob.load_state_dict(w_glob)
-            # print loss
-            loss_avg = sum(loss_locals) / len(loss_locals)
-            print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
-            loss_train.append(loss_avg)
-    elif args.methods == 'harmofl':
-        for iter in range(args.epochs):
-            loss_locals = []
-            if not args.all_clients:
-                w_locals = []
-            m = max(int(args.frac * args.num_users), 1)
-            idxs_users = np.random.choice(range(args.num_users), m, replace=False)
-            for idx in idxs_users:
-                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-                if args.all_clients:
-                    w_locals[idx] = copy.deepcopy(w)
-                else:
-                    w_locals.append(copy.deepcopy(w))
-                loss_locals.append(copy.deepcopy(loss))
-            # update global weights
-            w_glob = HarmoFL(w_locals)
-            # copy weight to net_glob
-            net_glob.load_state_dict(w_glob)
-            # print loss
-            loss_avg = sum(loss_locals) / len(loss_locals)
-            print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
-            loss_train.append(loss_avg)
-        # exit('該功能正在測試中 ...')
-    elif args.methods == 'feddc':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'feddyn':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'scaffold':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'fedprox':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'fedtp':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'fedsr':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'moon':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'fedbn':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'fedadam':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'fednova':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
-    elif args.methods == 'groundtruth':
-        print('Testing ...')
-        exit('該功能正在測試中 ...')
+        elif args.methods == 'harmofl':
+            net_glob,models = HarmoFL(net_glob,models,client_weights)
+
+        # copy weight to net_glob
+        
+        # print loss
+        loss_avg = sum(loss_locals) / len(loss_locals)
+        print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
+        loss_train.append(loss_avg)
+    # elif args.methods == 'harmofl':
+    # elif args.methods == 'feddc':
+    #     print('Testing ...')
+    # elif args.methods == 'feddyn':
+    #     print('Testing ...')
+    # elif args.methods == 'scaffold':
+    #     print('Testing ...')
+    # elif args.methods == 'fedprox':
+    #     print('Testing ...')
+    # elif args.methods == 'fedtp':
+    #     print('Testing ...')
+    # elif args.methods == 'fedsr':
+    #     print('Testing ...')
+    # elif args.methods == 'moon':
+    #     print('Testing ...')
+    # elif args.methods == 'fedbn':
+    #     print('Testing ...')
+    # elif args.methods == 'fedadam':
+    #     print('Testing ...')
+    # elif args.methods == 'fednova':
+    #     print('Testing ...')
+    # elif args.methods == 'groundtruth':
+    #     print('Testing ...')
+
     # plot loss curve
     plt.figure()
     plt.plot(range(len(loss_train)), loss_train)

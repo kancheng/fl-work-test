@@ -7,12 +7,12 @@ import torch
 from torch import nn
 
 
-def FedAvg(w):
-    w_avg = copy.deepcopy(w[0])
+def FedAvg(models):
+    w_avg = copy.deepcopy(models[0].state_dict())
     for k in w_avg.keys():
-        for i in range(1, len(w)):
-            w_avg[k] += w[i][k]
-        w_avg[k] = torch.div(w_avg[k], len(w))
+        for i in range(1, len(models)):
+            w_avg[k] += models[i].state_dict()[k]
+        w_avg[k] = torch.div(w_avg[k], len(models))
     return w_avg
 
 def HarmoFL(server_model, models, client_weights):
@@ -21,6 +21,7 @@ def HarmoFL(server_model, models, client_weights):
         for key in server_model.state_dict().keys():
             temp = torch.zeros_like(server_model.state_dict()[key])
             for client_idx in range(len(client_weights)):
+                print('client_weights', client_weights)
                 temp += client_weights[client_idx] * models[client_idx].state_dict()[key]
             server_model.state_dict()[key].data.copy_(temp)
             for client_idx in range(len(client_weights)):
