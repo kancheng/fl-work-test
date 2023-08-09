@@ -17,8 +17,6 @@ def args_parser():
     parser.add_argument('--momentum', type=float, default=0.5, help="SGD momentum (default: 0.5)")
     parser.add_argument('--split', type=str, default='user', help="train-test split type, user or sample")
     parser.add_argument('--num_users_info', action='store_true', help="display of the number of users")
-    # imbalance 不平衡 不要将训练数据截断为相同长度
-    parser.add_argument('--imbalance', action='store_true', help='do not truncate train data to same length')
 
     # methods
     parser.add_argument('--methods', type=str, default='fedavg', help='methods name')
@@ -49,5 +47,10 @@ def args_parser():
     parser.add_argument('--verbose', action='store_true', help='verbose print')
     parser.add_argument('--seed', type=int, default=1, help='random seed (default: 1)')
     parser.add_argument('--all_clients', action='store_true', help='aggregation over all clients')
+
+    # hfl
+    parser.add_argument('--log', action='store_true', help='whether to log')
+    # imbalance 不平衡 不要将训练数据截断为相同长度
+    parser.add_argument('--imbalance', action='store_true', help='do not truncate train data to same length')
     args = parser.parse_args()
     return args

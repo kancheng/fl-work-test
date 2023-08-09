@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # parse args
     args = args_parser()
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
-
+    args.log = True
     # load dataset and split users
     if args.dataset == 'mnist':
         trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
@@ -261,7 +261,7 @@ if __name__ == '__main__':
             loss_avg = sum(loss_locals) / len(loss_locals)
             print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
             loss_train.append(loss_avg)
-        exit('該功能正在測試中 ...')
+        # exit('該功能正在測試中 ...')
     elif args.methods == 'feddc':
         print('Testing ...')
         exit('該功能正在測試中 ...')
