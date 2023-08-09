@@ -129,17 +129,18 @@ def initialize_camelyon17(args):
             trainset = trainsets[idx]
             valset = valsets[idx]
             testset = testsets[idx]
-            # print(len(trainset))
-            # print(len(valset))
-            # print(len(testset))
+            # print('imbalance true - trainset', len(trainset))
+            # print('imbalance true - valset',len(valset))
+            # print('imbalance true - testset',len(testset))
         else:
             # print('============== imbalance false ==============')
+            # imbalance false 會根據擁有最小 trainset 的 Client 將每個設定到最小
             trainset = torch.utils.data.Subset(trainsets[idx], list(range(int(min_data_len))))
             valset = valsets[idx]
             testset = testsets[idx]
-            # print(len(trainset))
-            # print(len(valset))
-            # print(len(testset))
+            # print('imbalance false - trainset',len(trainset))
+            # print('imbalance false - valset',len(valset))
+            # print('imbalance false - testset',len(testset))
 
         train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.local_bs, shuffle=True))
         val_loaders.append(torch.utils.data.DataLoader(valset, batch_size=args.local_bs, shuffle=False))

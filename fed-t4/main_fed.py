@@ -37,7 +37,8 @@ if __name__ == '__main__':
         if args.iid:
             dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
         else:
-            exit('Error: only consider IID setting in CIFAR10')
+            dict_users = cifar_noniid(dataset_train, args.num_users, args.num_users_info)
+            # exit('Error: only consider IID setting in CIFAR10')
     elif args.dataset == 'cifar100':
         trans_cifar100 = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR100('./data/cifar100', train=True, download=True, transform=trans_cifar100)

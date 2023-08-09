@@ -91,15 +91,15 @@ python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 5
 
 python main_fed.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
 
-python main_nn.py --dataset cifar --iid --num_channels 1 --model cnn --epochs 50 --gpu 0  
+python main_nn.py --dataset cifar --num_channels 1 --model cnn --epochs 50 --gpu 0  
 
 python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 50 --gpu 0  
 
-python main_nn.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 50 --gpu 0  
+python main_nn.py --dataset cifar --num_channels 3 --model cnn --epochs 50 --gpu 0  
 
 python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 50 --gpu 0  
 
-python main_nn.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 50 --gpu 0 
+python main_nn.py --dataset cifar --num_channels 3 --model mlp --epochs 50 --gpu 0 
 
 python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 50 --gpu 0 --all_clients
 
@@ -109,23 +109,25 @@ python main_fed.py --dataset cifar100 --iid --num_channels 3 --model cnn --epoch
 
 python main_fed.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 50 --gpu 0 --num_classes 100
 
-python main_nn.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 5 --gpu 0
+python main_nn.py --dataset cifar100 --num_channels 3 --model cnn --epochs 5 --gpu 0 --local_bs 64 --num_classes 100
 
-python main_nn.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 5 --gpu 0
+python main_nn.py --dataset cifar100 --num_channels 3 --model mlp --epochs 5 --gpu 0 --local_bs 64 --num_classes 100
 
 python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 10 --gpu 0  
 
 python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 10 --gpu 0 --all_clients
 
-python main_nn.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 10 --gpu 0
+python main_nn.py --dataset mnist --num_channels 1 --model 2nn --epochs 10 --gpu 0
 
 python main_fed.py --dataset emnist --iid --num_channels 1 --model nn --epochs 10 --gpu 0  
 
-python main_nn.py --dataset emnist --iid --num_channels 1 --model nn --epochs 10 --gpu 0 
+python main_nn.py --dataset emnist --num_channels 1 --model nn --epochs 10 --gpu 0 
 
 python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 5 --gpu 0
 
 python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 15 --gpu 0  --lr 0.0001
 
-python main_nn.py --dataset salt --iid --num_channels 1 --model unet --epochs 15 --gpu 0  --lr 0.0001
+python main_nn.py --dataset salt --num_channels 1 --model unet --epochs 15 --gpu 0 --lr 0.0001
+
+python main_fed.py --dataset mnist --num_channels 1 --model cnn --epochs 5 --gpu 0
 ```

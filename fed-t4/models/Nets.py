@@ -96,7 +96,7 @@ class Decoder(nn.Module):
         x1 = self.conv_relu(x1)
         return x1
 class Ext_UNet(nn.Module):
-    def __init__(self,  args):
+    def __init__(self, args):
         super().__init__()
         self.base_model = torchvision.models.resnet18(True)
         self.base_layers = list(self.base_model.children())
