@@ -15,8 +15,6 @@ def FedAvg(w):
         w_avg[k] = torch.div(w_avg[k], len(w))
     return w_avg
 
-
-# communication - HarmoFL
 def HarmoFL(server_model, models, client_weights):
     with torch.no_grad():
         # aggregate params

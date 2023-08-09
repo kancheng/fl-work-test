@@ -49,6 +49,6 @@ from utils.options import args_parser
 from models.Update import LocalUpdate
 # from models.Nets import MLP, CNNMnist, CNNCifar, CNNCifar100, Mnist_2NN, UNet, Emnist_NN, Salt_UNet
 from models.Nets import *
-from models.Fed import FedAvg
+from models.Fed import *
 from models.test import *
 from models.train import *

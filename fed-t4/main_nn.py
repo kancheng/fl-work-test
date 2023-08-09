@@ -96,7 +96,6 @@ if __name__ == '__main__':
         val_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_val, 
                                                 batch_size=batch_size, 
                                                 shuffle=False)
-
     elif args.dataset == 'medicalmnist':
         train_dir = './external/medical-mnist/medical_mnist_processed/train'
         valid_dir = './external/medical-mnist/medical_mnist_processed/test'

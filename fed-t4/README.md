@@ -130,4 +130,8 @@ python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1
 python main_nn.py --dataset salt --num_channels 1 --model unet --epochs 15 --gpu 0 --lr 0.0001
 
 python main_fed.py --dataset mnist --num_channels 1 --model cnn --epochs 5 --gpu 0
+
+python main_fed.py --dataset cifar100 --num_channels 3 --model cnn --epochs 5 --gpu 0 --num_classes 100
+
+python main_fed.py --dataset cifar100 --num_channels 3 --model cnn --epochs 5 --gpu 0 --num_classes 100 --iid
 ```

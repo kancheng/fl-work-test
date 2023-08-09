@@ -46,7 +46,7 @@ if __name__ == '__main__':
         if args.iid:
             dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
         else:
-            exit('Error: only consider IID setting in CIFAR100')
+            dict_users = cifar_noniid(dataset_train, args.num_users, args.num_users_info)
     elif args.dataset == 'salt':
         path_train = './external/salt/train'
         path_test = './external/salt/test'
@@ -100,18 +100,15 @@ if __name__ == '__main__':
         train_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_train, 
                                                 batch_size=batch_size, 
                                                 shuffle=True)
-        dataset_train_pro = train_loader
         dataset_train = salt_ID_dataset_train
         val_loader = torch.utils.data.DataLoader(dataset=salt_ID_dataset_val, 
                                                 batch_size=batch_size, 
                                                 shuffle=False)
-        dataset_test_pro = val_loader
         dataset_test = salt_ID_dataset_val
         if args.iid:
             dict_users = exter_iid(dataset_train, args.num_users, args.num_users_info)
-            print(dict_users)
-            print(len(dict_users))
         else:
+            # dict_users = exter_noniid(dataset_train, args.num_users, args.num_users_info)
             exit('Error: only consider IID setting in the Salt Dataset.')
     elif args.dataset == 'medicalmnist':
         print('Medical MNIST Loading ...')
@@ -234,18 +231,36 @@ if __name__ == '__main__':
                     w_locals.append(copy.deepcopy(w))
                 loss_locals.append(copy.deepcopy(loss))
             # update global weights
-
             w_glob = FedAvg(w_locals)
-            
             # copy weight to net_glob
             net_glob.load_state_dict(w_glob)
-
             # print loss
             loss_avg = sum(loss_locals) / len(loss_locals)
             print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
             loss_train.append(loss_avg)
     elif args.methods == 'harmofl':
-        print('Testing ...')
+        for iter in range(args.epochs):
+            loss_locals = []
+            if not args.all_clients:
+                w_locals = []
+            m = max(int(args.frac * args.num_users), 1)
+            idxs_users = np.random.choice(range(args.num_users), m, replace=False)
+            for idx in idxs_users:
+                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
+                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                if args.all_clients:
+                    w_locals[idx] = copy.deepcopy(w)
+                else:
+                    w_locals.append(copy.deepcopy(w))
+                loss_locals.append(copy.deepcopy(loss))
+            # update global weights
+            w_glob = HarmoFL(w_locals)
+            # copy weight to net_glob
+            net_glob.load_state_dict(w_glob)
+            # print loss
+            loss_avg = sum(loss_locals) / len(loss_locals)
+            print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
+            loss_train.append(loss_avg)
         exit('該功能正在測試中 ...')
     elif args.methods == 'feddc':
         print('Testing ...')
