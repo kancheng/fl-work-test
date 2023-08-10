@@ -97,7 +97,7 @@ def communication(args, server_model, models, client_weights):
                 server_model.amp_norm.fix_amp = True
                 for model in models:
                     model.amp_norm.fix_amp = True
-    return server_model, models
+    return server_model, models 
 
 def initialize_camelyon17(args):
     train_loaders, test_loaders = [], []

@@ -73,7 +73,6 @@ class LocalUpdate(object):
     def train(self, net):
         net.train()
         # train and update
-        # optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum, weight_decay = 1e-4)
         if self.optimizer_op == 'sgd' :
             optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
         elif self.optimizer_op == 'adam' :

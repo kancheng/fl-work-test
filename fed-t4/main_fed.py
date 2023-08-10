@@ -11,7 +11,7 @@ from utils.dataset import *
 import time
 # 開始測量
 s_start = time.time()
-print('開始測量')
+print('開始測時 : ')
 
 if __name__ == '__main__':
     # parse args
@@ -242,15 +242,15 @@ if __name__ == '__main__':
     best_loss = None
     val_acc_list, net_list = [], []
     
-    # if args.all_clients: 
-    #     print("Aggregation over all clients")
-    #     models = [w_glob for i in range(args.num_users)]
-    #     print('INFO. : All clients - ', len(models))
+    if args.all_clients: 
+        print("Aggregation over all clients")
+        models = [net_glob for i in range(args.num_users)]
+        print('INFO. : All clients - ', len(models))
     for iter in range(args.epochs):
         loss_locals = []
-        # if not args.all_clients:
-        #     models = []
-        models = []
+        if not args.all_clients:
+            models = []
+        # models = []
         m = max(int(args.frac * args.num_users), 1)
         idxs_users = np.random.choice(range(args.num_users), m, replace=False)
         for idx in idxs_users:
@@ -273,27 +273,20 @@ if __name__ == '__main__':
                                     loss_func = loss_func_val,
                                     optimizer_op = 'sgd')
             model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-            # if args.all_clients:
-            #     models[idx] = copy.deepcopy(model)
-            #     print('INFO. - models[idx] : ', models[idx])
-            #     print('INFO. - type(models) : ', type(models))
-            #     print('INFO. - len(models) : ', len(models))
-
-            # else:
-            #     models.append(copy.deepcopy(model))
-            #     print('INFO. - models : ', models)
-            #     print('INFO. - type(models) : ', type(models))
-            #     print('INFO. - len(models) : ', len(models))
-            models.append(copy.deepcopy(model))
+            if args.all_clients:
+                models[idx] = copy.deepcopy(model)
+                print('INFO. - models[idx] : ', models[idx])
+                print('INFO. - type(models) : ', type(models))
+                print('INFO. - len(models) : ', len(models))
+            else:
+                models.append(copy.deepcopy(model))
+                print('INFO. - models : ', models)
+                print('INFO. - type(models) : ', type(models))
+                print('INFO. - len(models) : ', len(models))
+            # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))
         # update global weights
         if args.methods == 'fedavg':
-            # if args.all_clients:
-            #     w_glob = FedAvgE(models)
-            #     net_glob.load_state_dict(w_glob)
-            # else :
-            #     w_glob = FedAvg(models)
-            #     net_glob.load_state_dict(w_glob)
             w_glob = FedAvg(models)
             net_glob.load_state_dict(w_glob)
         elif args.methods == 'harmofl':
@@ -339,5 +332,5 @@ if __name__ == '__main__':
 # 結束測量
 s_end = time.time()
 # 輸出結果
-print("執行時間：%f 秒" % (s_end - s_start))
+print("執行時間 : %f 秒" % (s_end - s_start))
 
