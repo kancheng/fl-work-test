@@ -134,4 +134,11 @@ python main_fed.py --dataset mnist --num_channels 1 --model cnn --epochs 5 --gpu
 python main_fed.py --dataset cifar100 --num_channels 3 --model cnn --epochs 5 --gpu 0 --num_classes 100
 
 python main_fed.py --dataset cifar100 --num_channels 3 --model cnn --epochs 5 --gpu 0 --num_classes 100 --iid
+
+python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 5 --gpu 0 --method harmofl
+
+python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 5 --gpu 0 --method harmofl --all_clients
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 5 --gpu 0 --methods harmofl --all_clients
+
 ```

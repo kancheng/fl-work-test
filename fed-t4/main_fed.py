@@ -246,6 +246,15 @@ if __name__ == '__main__':
         print("Aggregation over all clients")
         models = [net_glob for i in range(args.num_users)]
         print('INFO. : All clients - ', len(models))
+    
+    # Mes
+    if args.methods == 'fedavg':
+        print('INFO. : Methods - FedAvg')
+    elif args.methods == 'harmofl':
+        print('INFO. : Methods - HarmoFL')
+    elif args.methods == 'feddc':
+        print('INFO. : Methods - FedDC')
+
     for iter in range(args.epochs):
         loss_locals = []
         if not args.all_clients:
@@ -275,14 +284,14 @@ if __name__ == '__main__':
             model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
             if args.all_clients:
                 models[idx] = copy.deepcopy(model)
-                print('INFO. - models[idx] : ', models[idx])
-                print('INFO. - type(models) : ', type(models))
-                print('INFO. - len(models) : ', len(models))
+                # print('INFO. - models[idx] : ', models[idx])
+                # print('INFO. - type(models) : ', type(models))
+                # print('INFO. - len(models) : ', len(models))
             else:
                 models.append(copy.deepcopy(model))
-                print('INFO. - models : ', models)
-                print('INFO. - type(models) : ', type(models))
-                print('INFO. - len(models) : ', len(models))
+                # print('INFO. - models : ', models)
+                # print('INFO. - type(models) : ', type(models))
+                # print('INFO. - len(models) : ', len(models))
             # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))
         # update global weights
@@ -291,12 +300,10 @@ if __name__ == '__main__':
             net_glob.load_state_dict(w_glob)
         elif args.methods == 'harmofl':
             net_glob, models = HarmoFL(net_glob, models, client_weights)
-
         # print loss
         loss_avg = sum(loss_locals) / len(loss_locals)
         print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
         loss_train.append(loss_avg)
-    # elif args.methods == 'harmofl':
     # elif args.methods == 'feddc':
     # elif args.methods == 'feddyn':
     # elif args.methods == 'scaffold':
