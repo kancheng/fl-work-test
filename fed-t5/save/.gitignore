@@ -1,0 +1,4 @@
+.ipynb_checkpoints
+__pycache__
+!fed_mnist_cnn_50_C0.1_iidTrue.png
+fed_*
