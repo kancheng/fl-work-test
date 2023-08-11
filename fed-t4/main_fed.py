@@ -302,7 +302,7 @@ if __name__ == '__main__':
             net_glob, models = HarmoFL(net_glob, models, client_weights)
         # print loss
         loss_avg = sum(loss_locals) / len(loss_locals)
-        print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
+        print('Round {:3d}, Average loss {:.3f}'.format(iter + 1, loss_avg))
         loss_train.append(loss_avg)
     # elif args.methods == 'feddc':
     # elif args.methods == 'feddyn':
