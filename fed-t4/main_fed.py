@@ -187,9 +187,15 @@ if __name__ == '__main__':
         exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
-
+    seed = args.seed
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    random.seed(seed)
+    cudnn.benchmark = False
+    cudnn.deterministic = True
     # PATH
-    args.save_path = './save_model/checkpoint/{}/seed{}'.format(args.data, seed)
+    args.save_path = './save_model/checkpoint/{}/seed{}'.format(args.dataset, seed)
     exp_folder = 'HarmoFL_exp'
     args.save_path = os.path.join(args.save_path, exp_folder)
     if not os.path.exists(args.save_path):
@@ -269,7 +275,14 @@ if __name__ == '__main__':
         print("Aggregation over all clients")
         models = [net_glob for i in range(args.num_users)]
         print('INFO. : All clients - ', len(models))
-    
+
+    if args.dataset == 'prostate':
+        optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
+    elif args.dataset == 'brain':
+        optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
+    else:
+        optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
+
     # Mes
     if args.methods == 'fedavg':
         print('INFO. : Methods - FedAvg')
@@ -292,7 +305,7 @@ if __name__ == '__main__':
             models[client_idx].to('cpu')
 
         best_epoch, best_acc  = checkpoint['best_epoch'], checkpoint['best_acc']
-        start_iter = int(checkpoint['a_iter']) + 1
+        start_iter = int(checkpoint['iter']) + 1
 
         print(f'Last time best:{best_epoch} acc :{best_acc}')
         print('Resume training from epoch {}'.format(start_iter))
@@ -302,7 +315,9 @@ if __name__ == '__main__':
         best_acc = [0. for j in range(client_num)]
         start_iter = 0
 
-    for iter in range(args.epochs):
+    # for a_iter in range(start_iter, args.iters):
+    # for iter in range(args.epochs):
+    for iter in range( start_iter, args.epochs):
         loss_locals = []
         if not args.all_clients:
             models = []
@@ -316,7 +331,7 @@ if __name__ == '__main__':
                                     idxs = None,
                                     loss_func = loss_func_val, 
                                     lu_loader = train_loaders[idx],
-                                    optimizer_op = 'sgd')
+                                    optimizer_op = optimizers)
             elif args.model == 'unet' and args.dataset == 'salt':
                 loss_func_val = nn.BCEWithLogitsLoss()
                 local = LocalUpdate(args = args, dataset = dataset_train, 
@@ -369,17 +384,17 @@ if __name__ == '__main__':
             print('============== {} =============='.format('Test'))
             if args.log:
                 logfile.write('============== {} ==============\n'.format('Test'))
-            for client_idx, datasite in enumerate(datasets): # net_glob
+            for client_idx, datasite in enumerate(datasets):
                 _, test_acc = test_med(args, net_glob, test_loaders[client_idx], loss_func_val, args.device)
-                print(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}'.format(datasite, a_iter, test_acc))
+                print(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}'.format(datasite, iter, test_acc))
                 if args.log:
-                    logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, a_iter, test_acc))
+                    logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, iter, test_acc))
 
             # Record best acc
             if np.mean(val_acc_list) > np.mean(best_acc):
                 for client_idx in range(client_num):
                     best_acc[client_idx] = val_acc_list[client_idx]
-                    best_epoch = a_iter
+                    best_epoch = iter
                     best_changed=True
                 print(' Best Epoch:{}'.format(best_epoch))
                 if args.log:
@@ -392,7 +407,7 @@ if __name__ == '__main__':
                 model_dicts = {'server_model': net_glob.state_dict(),
                                 'best_epoch': best_epoch,
                                 'best_acc': best_acc,
-                                'a_iter': a_iter}
+                                'iter': iter}
                 
                 for o_idx in range(client_num):
                     model_dicts['optim_{}'.format(o_idx)] = optimizers[o_idx].state_dict()
@@ -408,7 +423,7 @@ if __name__ == '__main__':
                 model_dicts = {'server_model': net_glob.state_dict(),
                                 'best_epoch': best_epoch,
                                 'best_acc': best_acc,
-                                'a_iter': a_iter}
+                                'iter': iter}
                 for o_idx in range(client_num):
                     model_dicts['optim_{}'.format(o_idx)] = optimizers[o_idx].state_dict()
 
@@ -447,8 +462,9 @@ if __name__ == '__main__':
 
 # 結束測量
 s_end = time.time()
-#save Model
-torch.save(model.state_dict(), PATH)
+
+# save Model
+# torch.save(model.state_dict(), PATH)
 
 
 # 輸出結果

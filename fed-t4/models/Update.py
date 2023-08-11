@@ -47,11 +47,11 @@ class DatasetSplit(Dataset):
 class LocalUpdate(object):
     def __init__(self, args, dataset=None, idxs=None, 
                  loss_func = nn.CrossEntropyLoss(), lu_loader=None,
-                 optimizer_op = 'sgd'):
+                 optimizer = None):
         self.args = args
         self.loss_func = loss_func
         self.selected_clients = []
-        self.optimizer_op = optimizer_op
+        self.optimizer = optimizer
         # salt batch_size = 1
         # self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=self.args.local_bs, shuffle=True)
         # 分組後只要讀進來就好，就不用再拆了。所以 batch_size=1。
@@ -73,15 +73,19 @@ class LocalUpdate(object):
     def train(self, net):
         net.train()
         # train and update
-        if self.optimizer_op == 'sgd' :
+        if self.optimizer == None:
             optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
-        elif self.optimizer_op == 'adam' :
-            optimizer = torch.optim.Adam(net.parameters(), lr=self.args.lr)
-        elif self.optimizer_op == 'wposgd' :
-            optimizer = WPOptim(params=net.parameters(), base_optimizer=torch.optim.SGD, 
-                    lr=self.args.lr, alpha=0.05, momentum=0.9, weight_decay=1e-4)
-        else :
-            optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
+
+        # if self.optimizer_op == 'sgd' :
+        #     optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
+        # elif self.optimizer_op == 'adam' :
+        #     optimizer = torch.optim.Adam(net.parameters(), lr=self.args.lr)
+        # elif self.optimizer_op == 'wposgd' :
+        #     optimizer = WPOptim(params=net.parameters(), base_optimizer=torch.optim.SGD, 
+        #             lr=self.args.lr, alpha=0.05, momentum=0.9, weight_decay=1e-4)
+        # else :
+        #     optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
+
         epoch_loss = []
         for iter in range(self.args.local_ep):
             batch_loss = []
