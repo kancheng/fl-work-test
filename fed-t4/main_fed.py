@@ -188,6 +188,29 @@ if __name__ == '__main__':
     else:
         exit('Error: unrecognized dataset')
 
+    # PATH
+    args.save_path = './save_model/checkpoint/{}/seed{}'.format(args.data, seed)
+    exp_folder = 'HarmoFL_exp'
+    args.save_path = os.path.join(args.save_path, exp_folder)
+    if not os.path.exists(args.save_path):
+        os.makedirs(args.save_path)
+    SAVE_PATH = os.path.join(args.save_path, 'HarmoFL')
+
+    print('# Deive:', args.device)
+    print('# Training Clients:{}'.format(datasets))
+
+    log = args.log
+
+    if log:
+        log_path = args.save_path.replace('checkpoint', 'log')
+        if not os.path.exists(log_path):
+            os.makedirs(log_path)
+        logfile = open(os.path.join(log_path,'HarmoFL.log'), 'a')
+        logfile.write('==={}===\n'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+        logfile.write('===Setting===\n')
+        for k in list(vars(args).keys()):
+            logfile.write('{}: {}\n'.format(k, vars(args)[k]))
+
     # federated client number
     client_num = args.num_users
     client_weights = [1./client_num for i in range(client_num)]
@@ -255,6 +278,30 @@ if __name__ == '__main__':
     elif args.methods == 'feddc':
         print('INFO. : Methods - FedDC')
 
+    if args.resume:
+        checkpoint = torch.load(SAVE_PATH+'_latest', map_location=args.device)
+        net_glob.load_state_dict(checkpoint['server_model'])
+        for client_idx in range(client_num):
+            models[client_idx].load_state_dict(checkpoint['server_model'])
+            models[client_idx].to(args.device)
+
+        if 'optim_0' in list(checkpoint.keys()):
+            for client_idx in range(client_num):
+                net_glob[client_idx].load_state_dict(checkpoint[f'optim_{client_idx}'])
+        for client_idx in range(client_num):
+            models[client_idx].to('cpu')
+
+        best_epoch, best_acc  = checkpoint['best_epoch'], checkpoint['best_acc']
+        start_iter = int(checkpoint['a_iter']) + 1
+
+        print(f'Last time best:{best_epoch} acc :{best_acc}')
+        print('Resume training from epoch {}'.format(start_iter))
+
+    else:
+        best_epoch = 0
+        best_acc = [0. for j in range(client_num)]
+        start_iter = 0
+
     for iter in range(args.epochs):
         loss_locals = []
         if not args.all_clients:
@@ -295,15 +342,77 @@ if __name__ == '__main__':
             # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))
         # update global weights
-        if args.methods == 'fedavg':
-            w_glob = FedAvg(models)
-            net_glob.load_state_dict(w_glob)
-        elif args.methods == 'harmofl':
-            net_glob, models = HarmoFL(net_glob, models, client_weights)
-        # print loss
-        loss_avg = sum(loss_locals) / len(loss_locals)
-        print('Round {:3d}, Average loss {:.3f}'.format(iter + 1, loss_avg))
-        loss_train.append(loss_avg)
+        with torch.no_grad():
+            if args.methods == 'fedavg':
+                w_glob = FedAvg(models)
+                net_glob.load_state_dict(w_glob)
+            elif args.methods == 'harmofl':
+                net_glob, models = HarmoFL(net_glob, models, client_weights)
+
+            # print loss
+            loss_val_acc_listavg = sum(loss_locals) / len(loss_locals)
+            print('Round {:3d}, Average loss {:.3f}'.format(iter +1, loss_val_acc_listavg))
+            loss_train.append(loss_val_acc_listavg)
+
+            val_acc_list = [None for j in range(models)]
+            print('============== {} =============='.format('Global Validation'))
+            if args.log:
+                    logfile.write('============== {} ==============\n'.format('Global Validation'))
+            for client_idx, model in enumerate(models):
+                val_loss, val_acc = test_med(args, net_glob, val_loaders[client_idx], loss_func_val, args.device)
+                val_acc_list[client_idx] = val_acc
+                print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
+                if args.log:
+                    logfile.write(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}\n'.format(datasets[client_idx], val_loss, val_acc))
+                    logfile.flush()
+            # Test after each round
+            print('============== {} =============='.format('Test'))
+            if args.log:
+                logfile.write('============== {} ==============\n'.format('Test'))
+            for client_idx, datasite in enumerate(datasets): # net_glob
+                _, test_acc = test_med(args, net_glob, test_loaders[client_idx], loss_func_val, args.device)
+                print(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}'.format(datasite, a_iter, test_acc))
+                if args.log:
+                    logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, a_iter, test_acc))
+
+            # Record best acc
+            if np.mean(val_acc_list) > np.mean(best_acc):
+                for client_idx in range(client_num):
+                    best_acc[client_idx] = val_acc_list[client_idx]
+                    best_epoch = a_iter
+                    best_changed=True
+                print(' Best Epoch:{}'.format(best_epoch))
+                if args.log:
+                    logfile.write(' Best Epoch:{}\n'.format(best_epoch))
+
+            if best_changed:
+                print(' Saving the local and server checkpoint to {}...'.format(SAVE_PATH))
+                if args.log: logfile.write(' Saving the local and server checkpoint to {}...\n'.format(SAVE_PATH))
+              
+                model_dicts = {'server_model': net_glob.state_dict(),
+                                'best_epoch': best_epoch,
+                                'best_acc': best_acc,
+                                'a_iter': a_iter}
+                
+                for o_idx in range(client_num):
+                    model_dicts['optim_{}'.format(o_idx)] = optimizers[o_idx].state_dict()
+
+                torch.save(model_dicts, SAVE_PATH)
+                torch.save(model_dicts, SAVE_PATH+'_latest')
+                best_changed = False
+            else:
+                # save the latest model
+                print(' Saving the latest checkpoint to {}...'.format(SAVE_PATH))
+                if args.log: logfile.write(' Saving the latest checkpoint to {}...\n'.format(SAVE_PATH))
+                
+                model_dicts = {'server_model': net_glob.state_dict(),
+                                'best_epoch': best_epoch,
+                                'best_acc': best_acc,
+                                'a_iter': a_iter}
+                for o_idx in range(client_num):
+                    model_dicts['optim_{}'.format(o_idx)] = optimizers[o_idx].state_dict()
+
+                torch.save(model_dicts, SAVE_PATH+'_latest')
     # elif args.methods == 'feddc':
     # elif args.methods == 'feddyn':
     # elif args.methods == 'scaffold':
@@ -338,6 +447,10 @@ if __name__ == '__main__':
 
 # 結束測量
 s_end = time.time()
+#save Model
+torch.save(model.state_dict(), PATH)
+
+
 # 輸出結果
 print("執行時間 : %f 秒" % (s_end - s_start))
 

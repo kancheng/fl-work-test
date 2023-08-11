@@ -226,6 +226,7 @@ python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1
 
 # CAMELYON17 DenseNet FEDAVG HARMOFL
 python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 1 --epochs 1
+python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 128 --epochs 1
 
 python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 1 --epochs 1 --all_clients
 
