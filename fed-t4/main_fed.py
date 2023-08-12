@@ -187,6 +187,7 @@ if __name__ == '__main__':
         exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
+    # Seed
     seed = args.seed
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -194,6 +195,7 @@ if __name__ == '__main__':
     random.seed(seed)
     cudnn.benchmark = False
     cudnn.deterministic = True
+
     # PATH
     args.save_path = './save_model/checkpoint/{}/seed{}'.format(args.dataset, seed)
     exp_folder = 'HarmoFL_exp'
@@ -275,7 +277,6 @@ if __name__ == '__main__':
         print("Aggregation over all clients")
         models = [net_glob for i in range(args.num_users)]
         print('INFO. : All clients - ', len(models))
-
 
     # Mes
     if args.methods == 'fedavg':
