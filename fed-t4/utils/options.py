@@ -53,7 +53,7 @@ def args_parser():
     parser.add_argument('--log', action='store_true', help='whether to log')
     # imbalance 不平衡 不要将训练数据截断为相同长度
     parser.add_argument('--imbalance', action='store_true', help='do not truncate train data to same length')
-
+    parser.add_argument('--alpha', type=float, default=0.05, help='The hyper parameter of perturbation in HarmoFL')
     parser.add_argument('--save_path', type = str, default='../checkpoint/', help='path to save the checkpoint')
     parser.add_argument('--test_path', type=str, default='../checkpoint/', help='path to saved model, for testing')
     parser.add_argument('--resume', action='store_true', help ='resume training from the save path checkpoint')

@@ -60,8 +60,8 @@ def test_med(args, model, data_loader, loss_fun, device):
     with torch.no_grad():
         for step, (data, target) in enumerate(data_loader):
 
-            data = data.to(device)
-            target = target.to(device)
+            data = data.to(args.device)
+            target = target.to(args.device)
             output = model(data)
             loss = loss_fun(output, target)
             loss_all += loss.item()

@@ -25,6 +25,7 @@ if __name__ == '__main__':
         trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
         dataset_train = datasets.MNIST('./data/mnist/', train=True, download=True, transform=trans_mnist)
         dataset_test = datasets.MNIST('./data/mnist/', train=False, download=True, transform=trans_mnist)
+        val_loaders = None
         # sample users
         if args.iid:
             dict_users = mnist_iid(dataset_train, args.num_users, args.num_users_info)
@@ -34,6 +35,7 @@ if __name__ == '__main__':
         trans_emnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
         dataset_train = datasets.EMNIST('./data/emnist/', split = 'digits', train=True, download=True, transform=trans_emnist)
         dataset_test = datasets.EMNIST('./data/emnist/', split = 'digits', train=False, download=True, transform=trans_emnist)
+        val_loaders = None
         if args.iid:
             dict_users = emnist_iid(dataset_train, args.num_users, args.num_users_info)
         else:
@@ -42,6 +44,7 @@ if __name__ == '__main__':
         trans_cifar = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR10('./data/cifar', train=True, download=True, transform=trans_cifar)
         dataset_test = datasets.CIFAR10('./data/cifar', train=False, download=True, transform=trans_cifar)
+        val_loaders = None
         if args.iid:
             dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
         else:
@@ -51,6 +54,7 @@ if __name__ == '__main__':
         trans_cifar100 = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR100('./data/cifar100', train=True, download=True, transform=trans_cifar100)
         dataset_test = datasets.CIFAR100('./data/cifar100', train=False, download=True, transform=trans_cifar100)
+        val_loaders = None
         if args.iid:
             dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
         else:
@@ -277,7 +281,7 @@ if __name__ == '__main__':
         print("Aggregation over all clients")
         models = [net_glob for i in range(args.num_users)]
         print('INFO. : All clients - ', len(models))
-
+    
     # Mes
     if args.methods == 'fedavg':
         print('INFO. : Methods - FedAvg')
@@ -321,12 +325,20 @@ if __name__ == '__main__':
         m = max(int(args.frac * args.num_users), 1)
         idxs_users = np.random.choice(range(args.num_users), m, replace=False)
         for idx in idxs_users:
+
+            try:
+                params = models[idx].parameters()
+            except IndexError:
+                params = net_glob.parameters()
+
             if args.dataset == 'prostate':
-                optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
+                optimizers = [WPOptim(params, base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
             elif args.dataset == 'brain':
-                optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
+                optimizers = [WPOptim(params, base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
             elif args.dataset == 'camelyon17':
-                optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
+                optimizers = [WPOptim(params, base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
+            else :
+                optimizers = [None for idx in range(client_num)]
 
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
                 dataset_train = _1[idx]
@@ -339,7 +351,7 @@ if __name__ == '__main__':
                                     idxs = None,
                                     loss_func = loss_func_val, 
                                     lu_loader = train_loaders[idx],
-                                    optimizer = optimizers)
+                                    optimizer = optimizers[idx])
             elif args.model == 'unet' and args.dataset == 'salt':
                 loss_func_val = nn.BCEWithLogitsLoss()
                 # local = LocalUpdate(args = args, dataset = dataset_train, 
@@ -349,7 +361,7 @@ if __name__ == '__main__':
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                 idxs = dict_users[idx],
                                 loss_func = loss_func_val,
-                                optimizer = 'adam')
+                                optimizer = optimizers[idx])
             else:
                 # local = LocalUpdate(args = args, dataset = dataset_train, 
                 #                     idxs = dict_users[idx],
@@ -358,18 +370,23 @@ if __name__ == '__main__':
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                     idxs = dict_users[idx],
                                     loss_func = loss_func_val,
-                                    optimizer = 'sgd')
-            model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-            if args.all_clients:
-                models[idx] = copy.deepcopy(model)
-                # print('INFO. - models[idx] : ', models[idx])
-                # print('INFO. - type(models) : ', type(models))
-                # print('INFO. - len(models) : ', len(models))
+                                    optimizer = optimizers[idx])
+            # 檢查models內有沒有初始化過
+            if len(models)<idx:    
+                model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                if args.all_clients:
+                    models[idx] = copy.deepcopy(model)
+                    # print('INFO. - models[idx] : ', models[idx])
+                    # print('INFO. - type(models) : ', type(models))
+                    # print('INFO. - len(models) : ', len(models))
+                else:
+                    models.append(copy.deepcopy(model))
+                    # print('INFO. - models : ', models)
+                    # print('INFO. - type(models) : ', type(models))
+                    # print('INFO. - len(models) : ', len(models))
             else:
-                models.append(copy.deepcopy(model))
-                # print('INFO. - models : ', models)
-                # print('INFO. - type(models) : ', type(models))
-                # print('INFO. - len(models) : ', len(models))
+                model, loss = local.train(net=models[idx].to(args.device))
+
             # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))
         # update global weights
@@ -385,12 +402,15 @@ if __name__ == '__main__':
             print('Round {:3d}, Average loss {:.3f}'.format(iter +1, loss_val_acc_listavg))
             loss_train.append(loss_val_acc_listavg)
 
-            val_acc_list = [None for j in range(models)]
+            val_acc_list = [None for j in range(len(models))]
             print('============== {} =============='.format('Global Validation'))
             if args.log:
                     logfile.write('============== {} ==============\n'.format('Global Validation'))
             for client_idx, model in enumerate(models):
-                val_loss, val_acc = test_med(args, net_glob, val_loaders[client_idx], loss_func_val, args.device)
+                if val_loaders == None:
+                    val_loss, val_acc = test_med(args, net_glob, dataset_test, loss_func_val, args.device)
+                else :
+                    val_loss, val_acc = test_med(args, net_glob, val_loaders[client_idx], loss_func_val, args.device)
                 val_acc_list[client_idx] = val_acc
                 print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
                 if args.log:
