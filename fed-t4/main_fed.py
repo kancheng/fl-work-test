@@ -408,9 +408,16 @@ if __name__ == '__main__':
                 else :
                     val_loss, val_acc = test_med(args, net_glob, val_loaders[client_idx], loss_func_val, args.device)
                 val_acc_list[client_idx] = val_acc
-                print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
+                # print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
+               #  print(' Site :', datasets[client_idx])
+                print(' Val  Loss:', val_loss)
+                print(' Val  Acc:', val_acc)
                 if args.log:
-                    logfile.write(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}\n'.format(datasets[client_idx], val_loss, val_acc))
+                    # logfile.write(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}\n'.format(datasets[client_idx], val_loss, val_acc))
+                    # logfile.write(' Site: \n', datasets[client_idx])
+                    logfile.write(' Val  Loss:\n', val_loss)
+                    logfile.write(' Val  Acc:\n', val_acc)
+                    
                     logfile.flush()
             # Test after each round
             # print('============== {} =============='.format('Test'))
@@ -425,7 +432,10 @@ if __name__ == '__main__':
                 print('Epoch:', iter)
                 print('Test Acc:', test_acc)
                 if args.log:
-                    logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, iter, test_acc))
+                    # logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, iter, test_acc))
+                    logfile.write(' Test site :\n', datasite)
+                    logfile.write(' Epoch:\n', iter)
+                    logfile.write(' Test site :\n', test_acc)
             # Record best acc
             if np.mean(val_acc_list) > np.mean(best_acc):
                 for client_idx in range(client_num):
