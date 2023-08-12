@@ -203,7 +203,7 @@ if __name__ == '__main__':
     SAVE_PATH = os.path.join(args.save_path, 'HarmoFL')
 
     print('# Deive:', args.device)
-    print('# Training Clients:{}'.format(datasets))
+    print('# Training Clients:{}'.format(args.dataset))
 
     log = args.log
 
@@ -276,12 +276,6 @@ if __name__ == '__main__':
         models = [net_glob for i in range(args.num_users)]
         print('INFO. : All clients - ', len(models))
 
-    if args.dataset == 'prostate':
-        optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
-    elif args.dataset == 'brain':
-        optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
-    else:
-        optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
 
     # Mes
     if args.methods == 'fedavg':
@@ -322,27 +316,48 @@ if __name__ == '__main__':
         if not args.all_clients:
             models = []
         # models = []
+
         m = max(int(args.frac * args.num_users), 1)
         idxs_users = np.random.choice(range(args.num_users), m, replace=False)
         for idx in idxs_users:
+            if args.dataset == 'prostate':
+                optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
+            elif args.dataset == 'brain':
+                optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
+            elif args.dataset == 'camelyon17':
+                optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
+
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
                 dataset_train = _1[idx]
+                # local = LocalUpdate(args = args, dataset = dataset_train, 
+                #                     idxs = None,
+                #                     loss_func = loss_func_val, 
+                #                     lu_loader = train_loaders[idx],
+                #                     optimizer_op = optimizers)
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                     idxs = None,
                                     loss_func = loss_func_val, 
                                     lu_loader = train_loaders[idx],
-                                    optimizer_op = optimizers)
+                                    optimizer = optimizers)
             elif args.model == 'unet' and args.dataset == 'salt':
                 loss_func_val = nn.BCEWithLogitsLoss()
+                # local = LocalUpdate(args = args, dataset = dataset_train, 
+                #                 idxs = dict_users[idx],
+                #                 loss_func = loss_func_val,
+                #                 optimizer_op = 'adam')
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                 idxs = dict_users[idx],
                                 loss_func = loss_func_val,
-                                optimizer_op = 'adam')
+                                optimizer = 'adam')
             else:
+                # local = LocalUpdate(args = args, dataset = dataset_train, 
+                #                     idxs = dict_users[idx],
+                #                     loss_func = loss_func_val,
+                #                     optimizer_op = 'sgd')
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                     idxs = dict_users[idx],
                                     loss_func = loss_func_val,
-                                    optimizer_op = 'sgd')
+                                    optimizer = 'sgd')
             model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
             if args.all_clients:
                 models[idx] = copy.deepcopy(model)
