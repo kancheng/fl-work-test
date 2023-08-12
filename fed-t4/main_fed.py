@@ -21,6 +21,9 @@ if __name__ == '__main__':
     # setting
     loss_func_val = nn.CrossEntropyLoss()
     # load dataset and split users
+    if args.methods == 'harmofl':
+        args.all_clients = True
+    
     if args.dataset == 'mnist':
         trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
         dataset_train = datasets.MNIST('./data/mnist/', train=True, download=True, transform=trans_mnist)
@@ -249,13 +252,10 @@ if __name__ == '__main__':
         net_glob = MedicalMNISTCNN(args=args).to(args.device)
     elif args.dataset == 'camelyon17':
         print('Loading ...')
-        # exit('該功能正在測試中 ...')
     elif args.dataset == 'prostate':
         print('Loading ...')
-        exit('該功能正在測試中 ...')
     elif args.dataset == 'brainfets2022':
         print('Loading ...')
-        exit('該功能正在測試中 ...')
     elif args.model == 'mlp':
         len_in = 1
         for x in img_size:
@@ -308,7 +308,6 @@ if __name__ == '__main__':
 
         print(f'Last time best:{best_epoch} acc :{best_acc}')
         print('Resume training from epoch {}'.format(start_iter))
-
     else:
         best_epoch = 0
         best_acc = [0. for j in range(client_num)]
@@ -339,7 +338,6 @@ if __name__ == '__main__':
                 optimizers = [WPOptim(params, base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
             else :
                 optimizers = [None for idx in range(client_num)]
-
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
                 dataset_train = _1[idx]
                 # local = LocalUpdate(args = args, dataset = dataset_train, 
@@ -371,7 +369,7 @@ if __name__ == '__main__':
                                     idxs = dict_users[idx],
                                     loss_func = loss_func_val,
                                     optimizer = optimizers[idx])
-            # 檢查models內有沒有初始化過
+            # 檢查 models 內有沒有初始化過
             if len(models)<idx:    
                 model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
                 if args.all_clients:
@@ -386,7 +384,6 @@ if __name__ == '__main__':
                     # print('INFO. - len(models) : ', len(models))
             else:
                 model, loss = local.train(net=models[idx].to(args.device))
-
             # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))
         # update global weights
@@ -396,7 +393,6 @@ if __name__ == '__main__':
                 net_glob.load_state_dict(w_glob)
             elif args.methods == 'harmofl':
                 net_glob, models = HarmoFL(net_glob, models, client_weights)
-
             # print loss
             loss_val_acc_listavg = sum(loss_locals) / len(loss_locals)
             print('Round {:3d}, Average loss {:.3f}'.format(iter +1, loss_val_acc_listavg))
@@ -417,15 +413,19 @@ if __name__ == '__main__':
                     logfile.write(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}\n'.format(datasets[client_idx], val_loss, val_acc))
                     logfile.flush()
             # Test after each round
-            print('============== {} =============='.format('Test'))
+            # print('============== {} =============='.format('Test'))
+            print('============== Test ==============')
             if args.log:
-                logfile.write('============== {} ==============\n'.format('Test'))
+                # logfile.write('============== {} ==============\n'.format('Test'))
+                logfile.write('============== Test ==============\n')
             for client_idx, datasite in enumerate(datasets):
                 _, test_acc = test_med(args, net_glob, test_loaders[client_idx], loss_func_val, args.device)
-                print(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}'.format(datasite, iter, test_acc))
+                # print(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}'.format(datasite, iter, test_acc))
+                print('Test site ', datasite)
+                print('Epoch:', iter)
+                print('Test Acc:', test_acc)
                 if args.log:
                     logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, iter, test_acc))
-
             # Record best acc
             if np.mean(val_acc_list) > np.mean(best_acc):
                 for client_idx in range(client_num):
@@ -435,7 +435,6 @@ if __name__ == '__main__':
                 print(' Best Epoch:{}'.format(best_epoch))
                 if args.log:
                     logfile.write(' Best Epoch:{}\n'.format(best_epoch))
-
             if best_changed:
                 print(' Saving the local and server checkpoint to {}...'.format(SAVE_PATH))
                 if args.log: logfile.write(' Saving the local and server checkpoint to {}...\n'.format(SAVE_PATH))
@@ -462,7 +461,6 @@ if __name__ == '__main__':
                                 'iter': iter}
                 for o_idx in range(client_num):
                     model_dicts['optim_{}'.format(o_idx)] = optimizers[o_idx].state_dict()
-
                 torch.save(model_dicts, SAVE_PATH+'_latest')
     # elif args.methods == 'feddc':
     # elif args.methods == 'feddyn':

@@ -100,6 +100,7 @@ class LocalUpdate(object):
                 # loss = nn.BCEWithLogitsLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 # loss = nn.CrossEntropyLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 loss.backward()
+                self.optimizer.generate_delta(zero_grad=True)
                 self.optimizer.step()
                 if self.args.verbose and batch_idx % 10 == 0:
                     print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
