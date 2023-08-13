@@ -78,7 +78,7 @@ def test_med(args, model, data_loader, loss_fun, device):
 
     loss = loss_all / len(data_loader)
     acc = test_acc/ len(data_loader) if segmentation else correct/total
-    model.to('cpu')
+    #model.to('cpu')
     return loss, acc
 
 

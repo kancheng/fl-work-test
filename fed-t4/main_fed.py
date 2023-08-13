@@ -409,14 +409,14 @@ if __name__ == '__main__':
                     val_loss, val_acc = test_med(args, net_glob, val_loaders[client_idx], loss_func_val, args.device)
                 val_acc_list[client_idx] = val_acc
                 # print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
-               #  print(' Site :', datasets[client_idx])
+                print(' Site :', init_dataset[client_idx])
                 print(' Val  Loss:', val_loss)
                 print(' Val  Acc:', val_acc)
                 if args.log:
                     # logfile.write(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}\n'.format(datasets[client_idx], val_loss, val_acc))
                     # logfile.write(' Site: \n', datasets[client_idx])
-                    logfile.write(' Val  Loss:\n', val_loss)
-                    logfile.write(' Val  Acc:\n', val_acc)
+                    logfile.write(' Val Loss:'+ str(val_loss))
+                    logfile.write(' Val Acc:'+ str(val_acc))
                     
                     logfile.flush()
             # Test after each round
@@ -425,29 +425,29 @@ if __name__ == '__main__':
             if args.log:
                 # logfile.write('============== {} ==============\n'.format('Test'))
                 logfile.write('============== Test ==============\n')
-            for client_idx, datasite in enumerate(datasets):
+            for client_idx, datasite in enumerate(init_dataset):
                 _, test_acc = test_med(args, net_glob, test_loaders[client_idx], loss_func_val, args.device)
                 # print(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}'.format(datasite, iter, test_acc))
                 print('Test site ', datasite)
-                print('Epoch:', iter)
+                print('Epoch:', str(iter))
                 print('Test Acc:', test_acc)
-                if args.log:
+                #if args.log:
                     # logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, iter, test_acc))
-                    logfile.write(' Test site :\n', datasite)
-                    logfile.write(' Epoch:\n', iter)
-                    logfile.write(' Test site :\n', test_acc)
+                    # logfile.write(' Test site :' + datasite)
+                    # logfile.write(' Epoch: ' + str(iter))
+                    # logfile.write(' Test site :' + test_acc)
             # Record best acc
             if np.mean(val_acc_list) > np.mean(best_acc):
                 for client_idx in range(client_num):
                     best_acc[client_idx] = val_acc_list[client_idx]
                     best_epoch = iter
                     best_changed=True
-                print(' Best Epoch:{}'.format(best_epoch))
-                if args.log:
-                    logfile.write(' Best Epoch:{}\n'.format(best_epoch))
+                print(' Best Epoch:' , best_epoch)
+                # if args.log:
+                #     logfile.write(' Best Epoch:'+ best_epoch)
             if best_changed:
-                print(' Saving the local and server checkpoint to {}...'.format(SAVE_PATH))
-                if args.log: logfile.write(' Saving the local and server checkpoint to {}...\n'.format(SAVE_PATH))
+                print(' Saving the local and server checkpoint to ', SAVE_PATH )
+                if args.log: logfile.write(' Saving the local and server checkpoint to ' + SAVE_PATH)
               
                 model_dicts = {'server_model': net_glob.state_dict(),
                                 'best_epoch': best_epoch,
@@ -462,8 +462,8 @@ if __name__ == '__main__':
                 best_changed = False
             else:
                 # save the latest model
-                print(' Saving the latest checkpoint to {}...'.format(SAVE_PATH))
-                if args.log: logfile.write(' Saving the latest checkpoint to {}...\n'.format(SAVE_PATH))
+                print(' Saving the latest checkpoint to ', SAVE_PATH)
+                if args.log: logfile.write(' Saving the latest checkpoint to '+ SAVE_PATH)
                 
                 model_dicts = {'server_model': net_glob.state_dict(),
                                 'best_epoch': best_epoch,
@@ -491,18 +491,18 @@ if __name__ == '__main__':
     plt.savefig('./save/fed_{}_{}_{}_C{}_iid_{}_{}.png'.format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.methods))
 
     # testing
-    net_glob.eval()
-    if args.model == 'unet' and args.dataset == 'salt':
-        criterion = nn.BCEWithLogitsLoss()
-        train_loss, train_iou = test_img_segmentation(net_glob, args.device, dataset_train, criterion)
-        test_loss, test_iou = test_img_segmentation(net_glob, args.device, dataset_test, criterion)
-        print(f'Train - Valid loss: {train_loss:.3f} | Train - Valid IoU: {train_iou:.3f} ')
-        print(f'Test - Valid loss: {test_loss:.3f} | Test - Valid IoU: {test_iou:.3f} ')
-    else:
-        acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'ce')
-        acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'ce')
-        print("Training accuracy: {:.2f}".format(acc_train))
-        print("Testing accuracy: {:.2f}".format(acc_test))
+    # net_glob.eval()
+    # if args.model == 'unet' and args.dataset == 'salt':
+    #     criterion = nn.BCEWithLogitsLoss()
+    #     train_loss, train_iou = test_img_segmentation(net_glob, args.device, dataset_train, criterion)
+    #     test_loss, test_iou = test_img_segmentation(net_glob, args.device, dataset_test, criterion)
+    #     print(f'Train - Valid loss: {train_loss:.3f} | Train - Valid IoU: {train_iou:.3f} ')
+    #     print(f'Test - Valid loss: {test_loss:.3f} | Test - Valid IoU: {test_iou:.3f} ')
+    # else:
+    #     acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'ce')
+    #     acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'ce')
+    #     print("Training accuracy: {:.2f}".format(acc_train))
+    #     print("Testing accuracy: {:.2f}".format(acc_test))
 
 # 結束測量
 s_end = time.time()

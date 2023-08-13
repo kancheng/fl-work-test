@@ -60,8 +60,8 @@ class LocalUpdate(object):
         #     self.ldr_train = DataLoader(DatasetSplit2(dataset, idxs), batch_size=1)
         # else :
         #     self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=1)
-        if idxs == None:
-            if lu_loader==None :
+        if idxs is None:
+            if lu_loader is None :
                 self.ldr_train = DataLoader(dataset, batch_size = 1)
             else :
                 self.ldr_train = lu_loader
@@ -73,7 +73,7 @@ class LocalUpdate(object):
     def train(self, net):
         net.train()
         # train and update
-        if self.optimizer == None:
+        if self.optimizer is None:
             self.optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
 
         # if self.optimizer_op == 'sgd' :
@@ -100,7 +100,8 @@ class LocalUpdate(object):
                 # loss = nn.BCEWithLogitsLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 # loss = nn.CrossEntropyLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 loss.backward()
-                self.optimizer.generate_delta(zero_grad=True)
+                if hasattr(self.optimizer, 'generate_delta') and callable(self.optimizer.generate_delta):
+                    self.optimizer.generate_delta(zero_grad=True)
                 self.optimizer.step()
                 if self.args.verbose and batch_idx % 10 == 0:
                     print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
