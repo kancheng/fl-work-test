@@ -403,10 +403,10 @@ if __name__ == '__main__':
             if args.log:
                     logfile.write('============== {} ==============\n'.format('Global Validation'))
             for client_idx, model in enumerate(models):
-                if val_loaders == None:
-                    val_loss, val_acc = test_med(args, net_glob, dataset_test, loss_func_val, args.device)
+                if val_loaders is None:
+                    val_loss, val_acc = test_med(args, model, dataset_test, loss_func_val, args.device)
                 else :
-                    val_loss, val_acc = test_med(args, net_glob, val_loaders[client_idx], loss_func_val, args.device)
+                    val_loss, val_acc = test_med(args, model, val_loaders[client_idx], loss_func_val, args.device)
                 val_acc_list[client_idx] = val_acc
                 # print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
                 print(' Site :', init_dataset[client_idx])

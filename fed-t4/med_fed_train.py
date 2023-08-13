@@ -21,8 +21,8 @@ def train_perturbation(args, model, data_loader, optimizer, loss_fun, device):
     for step, (data, target) in enumerate(data_loader):
         optimizer.zero_grad()
 
-        data = data.to(device)
-        target = target.to(device)
+        #data = data.to(device)
+        #target = target.to(device)
         output = model(data)
         loss = loss_fun(output, target)
         loss_all += loss.item()
@@ -49,6 +49,8 @@ def train_perturbation(args, model, data_loader, optimizer, loss_fun, device):
     return loss, acc
 
 def test_med(args, model, data_loader, loss_fun, device):
+    if isinstance(data_loader,torch.utils.data.DataLoader) != True:
+        data_loader = torch.utils.data.DataLoader(data_loader)
     model.to(device)
     model.eval()
     loss_all = 0
@@ -60,8 +62,8 @@ def test_med(args, model, data_loader, loss_fun, device):
     with torch.no_grad():
         for step, (data, target) in enumerate(data_loader):
 
-            data = data.to(args.device)
-            target = target.to(args.device)
+            # data = data.to(args.device)
+            # target = target.to(args.device)
             output = model(data)
             loss = loss_fun(output, target)
             loss_all += loss.item()
