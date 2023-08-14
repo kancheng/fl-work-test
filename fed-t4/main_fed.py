@@ -167,15 +167,15 @@ if __name__ == '__main__':
         net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
         args.num_users = len(init_dataset)
         client_num = args.num_users
-        print(net_glob)
-        print(loss_func_val)
-        print(init_dataset)
-        print(_1)
-        print(_2)
-        print(train_loaders)
-        print(val_loaders)
-        print(test_loaders)
-        exit('該功能正在測試中 ...')
+        # print(net_glob)
+        # print(loss_func_val)
+        # print(init_dataset)
+        # print(_1)
+        # print(_2)
+        # print(train_loaders)
+        # print(val_loaders)
+        # print(test_loaders)
+        # exit('該功能正在測試中 ...')
     elif args.dataset == 'brainfets2022':
         args.model = 'hfl'
         print('FeTS2022 (brain) Loading ...')
@@ -183,15 +183,15 @@ if __name__ == '__main__':
         net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
         args.num_users = len(init_dataset)
         client_num = args.num_users
-        print(net_glob)
-        print(loss_func_val)
-        print(init_dataset)
-        print(_1)
-        print(_2)
-        print(train_loaders)
-        print(val_loaders)
-        print(test_loaders)
-        exit('該功能正在測試中 ...')
+        # print(net_glob)
+        # print(loss_func_val)
+        # print(init_dataset)
+        # print(_1)
+        # print(_2)
+        # print(train_loaders)
+        # print(val_loaders)
+        # print(test_loaders)
+        # exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
     # Seed
@@ -399,14 +399,22 @@ if __name__ == '__main__':
             loss_train.append(loss_val_acc_listavg)
 
             val_acc_list = [None for j in range(len(models))]
-            print('============== {} =============='.format('Global Validation'))
+            print('============== Global Validation ==============')
             if args.log:
-                    logfile.write('============== {} ==============\n'.format('Global Validation'))
+                    # logfile.write('============== {} ==============\n'.format('Global Validation'))
+                    logfile.write('============== Global Validation ==============\n')
             for client_idx, model in enumerate(models):
                 if val_loaders is None:
                     val_loss, val_acc = test_med(args, model, dataset_test, loss_func_val, args.device)
                 else :
                     val_loss, val_acc = test_med(args, model, val_loaders[client_idx], loss_func_val, args.device)
+                
+                # MNIST ...
+                #     acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'ce')
+                #     acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'ce')
+                #     print("Training accuracy: {:.2f}".format(acc_train))
+                #     print("Testing accuracy: {:.2f}".format(acc_test))
+
                 val_acc_list[client_idx] = val_acc
                 # print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
                 print(' Site :', init_dataset[client_idx])
