@@ -45,7 +45,7 @@ def train_perturbation(args, model, data_loader, optimizer, loss_fun, device):
     loss = loss_all / len(data_loader)
     acc = train_acc/ len(data_loader) if segmentation else correct/total
 
-    model.to('cpu')
+    # model.to('cpu')
     return loss, acc
 
 def test_med(args, model, data_loader, loss_fun, device):
@@ -61,9 +61,8 @@ def test_med(args, model, data_loader, loss_fun, device):
 
     with torch.no_grad():
         for step, (data, target) in enumerate(data_loader):
-
-            # data = data.to(args.device)
-            # target = target.to(args.device)
+            data = data.to(args.device)
+            target = target.to(args.device)
             output = model(data)
             loss = loss_fun(output, target)
             loss_all += loss.item()
@@ -80,26 +79,7 @@ def test_med(args, model, data_loader, loss_fun, device):
 
     loss = loss_all / len(data_loader)
     acc = test_acc/ len(data_loader) if segmentation else correct/total
-    #model.to('cpu')
     return loss, acc
-
-
-def communication(args, server_model, models, client_weights):
-    with torch.no_grad():
-        # aggregate params
-        for key in server_model.state_dict().keys():
-            temp = torch.zeros_like(server_model.state_dict()[key])
-            for client_idx in range(len(client_weights)):
-                temp += client_weights[client_idx] * models[client_idx].state_dict()[key]
-            server_model.state_dict()[key].data.copy_(temp)
-            for client_idx in range(len(client_weights)):
-                models[client_idx].state_dict()[key].data.copy_(server_model.state_dict()[key])
-            if 'running_amp' in key:
-                # aggregate at first round only to save communication cost
-                server_model.amp_norm.fix_amp = True
-                for model in models:
-                    model.amp_norm.fix_amp = True
-    return server_model, models 
 
 def initialize_camelyon17(args):
     train_loaders, test_loaders = [], []

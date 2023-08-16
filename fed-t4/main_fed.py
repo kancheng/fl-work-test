@@ -29,11 +29,26 @@ if __name__ == '__main__':
         dataset_train = datasets.MNIST('./data/mnist/', train=True, download=True, transform=trans_mnist)
         dataset_test = datasets.MNIST('./data/mnist/', train=False, download=True, transform=trans_mnist)
         val_loaders = None
+        test_loaders = []
+        # # !???
+        # test_loaders.append(torch.utils.data.DataLoader(dataset_test, batch_size=args.local_bs, shuffle=False))
+        # test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.local_bs, shuffle=False))
         # sample users
         if args.iid:
             dict_users = mnist_iid(dataset_train, args.num_users, args.num_users_info)
+            dict_users_test = mnist_iid(dataset_test, args.num_users, args.num_users_info)
+            for idx in range(len(dict_users_test)):
+                # self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size = 1)
+                test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
+                test_loaders.append(test_obj)
+            #     print(test_obj)
+            #     print(len(test_obj))
+            #     print(test_loaders)
+            #     print(len(test_loaders))
+            # exit()
         else:
             dict_users = mnist_noniid(dataset_train, args.num_users, args.num_users_info)
+            dict_users_test = mnist_noniid(dataset_test, args.num_users, args.num_users_info)
     elif args.dataset == 'emnist':
         trans_emnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
         dataset_train = datasets.EMNIST('./data/emnist/', split = 'digits', train=True, download=True, transform=trans_emnist)
@@ -150,15 +165,10 @@ if __name__ == '__main__':
         # python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 5 --gpu 0 --methods harmofl
         net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_camelyon17(args)
         args.num_users = len(init_dataset)
-        # federated client number
+        
         client_num = args.num_users
         client_weights = [1./client_num for i in range(client_num)]
-        # print(net_glob)
-        # print(loss_func_val)
-        # print(init_dataset)
-        # print(train_loaders)
-        # print(val_loaders)
-        # print(test_loaders)
+
         # exit('該功能正在測試中 ...')
     elif args.dataset == 'prostate':
         args.model = 'hfl'
@@ -167,14 +177,6 @@ if __name__ == '__main__':
         net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
         args.num_users = len(init_dataset)
         client_num = args.num_users
-        # print(net_glob)
-        # print(loss_func_val)
-        # print(init_dataset)
-        # print(_1)
-        # print(_2)
-        # print(train_loaders)
-        # print(val_loaders)
-        # print(test_loaders)
         # exit('該功能正在測試中 ...')
     elif args.dataset == 'brainfets2022':
         args.model = 'hfl'
@@ -183,14 +185,6 @@ if __name__ == '__main__':
         net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
         args.num_users = len(init_dataset)
         client_num = args.num_users
-        # print(net_glob)
-        # print(loss_func_val)
-        # print(init_dataset)
-        # print(_1)
-        # print(_2)
-        # print(train_loaders)
-        # print(val_loaders)
-        # print(test_loaders)
         # exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
@@ -300,8 +294,8 @@ if __name__ == '__main__':
         if 'optim_0' in list(checkpoint.keys()):
             for client_idx in range(client_num):
                 net_glob[client_idx].load_state_dict(checkpoint[f'optim_{client_idx}'])
-        for client_idx in range(client_num):
-            models[client_idx].to('cpu')
+        #for client_idx in range(client_num):
+           # models[client_idx].to('cpu')
 
         best_epoch, best_acc  = checkpoint['best_epoch'], checkpoint['best_acc']
         start_iter = int(checkpoint['iter']) + 1
@@ -417,7 +411,7 @@ if __name__ == '__main__':
 
                 val_acc_list[client_idx] = val_acc
                 # print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
-                print(' Site :', init_dataset[client_idx])
+                print(' Site :', client_idx)
                 print(' Val  Loss:', val_loss)
                 print(' Val  Acc:', val_acc)
                 if args.log:
@@ -428,25 +422,21 @@ if __name__ == '__main__':
                     
                     logfile.flush()
             # Test after each round
-            # print('============== {} =============='.format('Test'))
             print('============== Test ==============')
             if args.log:
-                # logfile.write('============== {} ==============\n'.format('Test'))
                 logfile.write('============== Test ==============\n')
-            for client_idx, datasite in enumerate(init_dataset):
+            for client_idx, model in enumerate(models):
                 _, test_acc = test_med(args, net_glob, test_loaders[client_idx], loss_func_val, args.device)
-                # print(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}'.format(datasite, iter, test_acc))
-                print('Test site ', datasite)
+                print('Test site ', client_idx)
                 print('Epoch:', str(iter))
                 print('Test Acc:', test_acc)
-                #if args.log:
+                # if args.log:
                     # logfile.write(' Test site-{:<10s}| Epoch:{} | Test Acc: {:.4f}\n'.format(datasite, iter, test_acc))
-                    # logfile.write(' Test site :' + datasite)
-                    # logfile.write(' Epoch: ' + str(iter))
-                    # logfile.write(' Test site :' + test_acc)
             # Record best acc
             if np.mean(val_acc_list) > np.mean(best_acc):
-                for client_idx in range(client_num):
+                # print(client_idx)
+                # for client_idx in range(client_num):
+                for client_idx in range(len(val_acc_list)):
                     best_acc[client_idx] = val_acc_list[client_idx]
                     best_epoch = iter
                     best_changed=True
@@ -517,7 +507,6 @@ s_end = time.time()
 
 # save Model
 # torch.save(model.state_dict(), PATH)
-
 
 # 輸出結果
 print("執行時間 : %f 秒" % (s_end - s_start))

@@ -42,7 +42,6 @@ class DatasetSplit(Dataset):
 #             print("image:\t", image)
 #             print("label:\t", label)
 #         return image, label
-    
 
 class LocalUpdate(object):
     def __init__(self, args, dataset=None, idxs=None, 
