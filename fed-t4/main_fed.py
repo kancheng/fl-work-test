@@ -395,7 +395,6 @@ if __name__ == '__main__':
             val_acc_list = [None for j in range(len(models))]
             print('============== Global Validation ==============')
             if args.log:
-                    # logfile.write('============== {} ==============\n'.format('Global Validation'))
                     logfile.write('============== Global Validation ==============\n')
             for client_idx, model in enumerate(models):
                 if val_loaders is None:
