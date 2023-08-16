@@ -331,7 +331,7 @@ if __name__ == '__main__':
             elif args.dataset == 'camelyon17':
                 optimizers = [WPOptim(params, base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
             else :
-                optimizers = [None for idx in range(client_num)]
+                optimizers = [torch.optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum) for idx in range(client_num)]
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
                 dataset_train = _1[idx]
                 # local = LocalUpdate(args = args, dataset = dataset_train, 
@@ -364,7 +364,7 @@ if __name__ == '__main__':
                                     loss_func = loss_func_val,
                                     optimizer = optimizers[idx])
             # 檢查 models 內有沒有初始化過
-            if len(models)<idx:    
+            if len(models)<idx:
                 model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
                 if args.all_clients:
                     models[idx] = copy.deepcopy(model)
@@ -452,7 +452,8 @@ if __name__ == '__main__':
                                 'best_acc': best_acc,
                                 'iter': iter}
                 
-                for o_idx in range(client_num):
+                for o_idx in range(len(val_acc_list)):
+                # for o_idx in range(client_num):
                     model_dicts['optim_{}'.format(o_idx)] = optimizers[o_idx].state_dict()
 
                 torch.save(model_dicts, SAVE_PATH)

@@ -109,4 +109,3 @@ class LocalUpdate(object):
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))
         return net, sum(epoch_loss) / len(epoch_loss)
-
