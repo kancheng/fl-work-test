@@ -30,32 +30,30 @@ if __name__ == '__main__':
         dataset_test = datasets.MNIST('./data/mnist/', train=False, download=True, transform=trans_mnist)
         val_loaders = None
         test_loaders = []
-        # # !???
-        # test_loaders.append(torch.utils.data.DataLoader(dataset_test, batch_size=args.local_bs, shuffle=False))
-        # test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.local_bs, shuffle=False))
-        # sample users
         if args.iid:
             dict_users = mnist_iid(dataset_train, args.num_users, args.num_users_info)
             dict_users_test = mnist_iid(dataset_test, args.num_users, args.num_users_info)
             for idx in range(len(dict_users_test)):
-                # self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size = 1)
                 test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
                 test_loaders.append(test_obj)
-            #     print(test_obj)
-            #     print(len(test_obj))
-            #     print(test_loaders)
-            #     print(len(test_loaders))
-            # exit()
         else:
             dict_users = mnist_noniid(dataset_train, args.num_users, args.num_users_info)
             dict_users_test = mnist_noniid(dataset_test, args.num_users, args.num_users_info)
+            for idx in range(len(dict_users_test)):
+                test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
+                test_loaders.append(test_obj)
     elif args.dataset == 'emnist':
         trans_emnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, ), (0.5, ))])
         dataset_train = datasets.EMNIST('./data/emnist/', split = 'digits', train=True, download=True, transform=trans_emnist)
         dataset_test = datasets.EMNIST('./data/emnist/', split = 'digits', train=False, download=True, transform=trans_emnist)
         val_loaders = None
+        test_loaders = []
         if args.iid:
             dict_users = emnist_iid(dataset_train, args.num_users, args.num_users_info)
+            dict_users_test = emnist_iid(dataset_test, args.num_users, args.num_users_info)
+            for idx in range(len(dict_users_test)):
+                test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
+                test_loaders.append(test_obj)
         else:
              exit('Error: only consider IID setting in EMNIST')
     elif args.dataset == 'cifar':
@@ -63,20 +61,37 @@ if __name__ == '__main__':
         dataset_train = datasets.CIFAR10('./data/cifar', train=True, download=True, transform=trans_cifar)
         dataset_test = datasets.CIFAR10('./data/cifar', train=False, download=True, transform=trans_cifar)
         val_loaders = None
+        test_loaders = []
         if args.iid:
             dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
+            dict_users_test = cifar_iid(dataset_test, args.num_users, args.num_users_info)
+            for idx in range(len(dict_users_test)):
+                test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
+                test_loaders.append(test_obj)
         else:
             dict_users = cifar_noniid(dataset_train, args.num_users, args.num_users_info)
-            # exit('Error: only consider IID setting in CIFAR10')
+            dict_users_test = cifar_noniid(dataset_test, args.num_users, args.num_users_info)
+            for idx in range(len(dict_users_test)):
+                test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
+                test_loaders.append(test_obj)
     elif args.dataset == 'cifar100':
         trans_cifar100 = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR100('./data/cifar100', train=True, download=True, transform=trans_cifar100)
         dataset_test = datasets.CIFAR100('./data/cifar100', train=False, download=True, transform=trans_cifar100)
         val_loaders = None
+        test_loaders = []
         if args.iid:
             dict_users = cifar_iid(dataset_train, args.num_users, args.num_users_info)
+            dict_users_test = cifar_iid(dataset_test, args.num_users, args.num_users_info)
+            for idx in range(len(dict_users_test)):
+                test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
+                test_loaders.append(test_obj)
         else:
             dict_users = cifar_noniid(dataset_train, args.num_users, args.num_users_info)
+            dict_users_test = cifar_noniid(dataset_test, args.num_users, args.num_users_info)
+            for idx in range(len(dict_users_test)):
+                test_obj = DataLoader(DatasetSplit(dataset_test, dict_users_test[idx]), batch_size = 1)
+                test_loaders.append(test_obj)
     elif args.dataset == 'salt':
         path_train = './external/salt/train'
         path_test = './external/salt/test'
@@ -307,8 +322,6 @@ if __name__ == '__main__':
         best_acc = [0. for j in range(client_num)]
         start_iter = 0
 
-    # for a_iter in range(start_iter, args.iters):
-    # for iter in range(args.epochs):
     for iter in range( start_iter, args.epochs):
         loss_locals = []
         if not args.all_clients:
