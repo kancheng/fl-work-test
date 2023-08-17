@@ -137,8 +137,6 @@ if __name__ == '__main__':
 
     # train_loader = DataLoader(dataset_train, batch_size=1, shuffle=True)
     train_loader = DataLoader(dataset_train, batch_size=args.local_bs, shuffle=True)
-    
-
 
     list_loss = []
     net_glob.train()

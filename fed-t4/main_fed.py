@@ -347,11 +347,6 @@ if __name__ == '__main__':
                 optimizers = [torch.optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum) for idx in range(client_num)]
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
                 dataset_train = _1[idx]
-                # local = LocalUpdate(args = args, dataset = dataset_train, 
-                #                     idxs = None,
-                #                     loss_func = loss_func_val, 
-                #                     lu_loader = train_loaders[idx],
-                #                     optimizer_op = optimizers)
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                     idxs = None,
                                     loss_func = loss_func_val, 
@@ -359,19 +354,11 @@ if __name__ == '__main__':
                                     optimizer = optimizers[idx])
             elif args.model == 'unet' and args.dataset == 'salt':
                 loss_func_val = nn.BCEWithLogitsLoss()
-                # local = LocalUpdate(args = args, dataset = dataset_train, 
-                #                 idxs = dict_users[idx],
-                #                 loss_func = loss_func_val,
-                #                 optimizer_op = 'adam')
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                 idxs = dict_users[idx],
                                 loss_func = loss_func_val,
                                 optimizer = optimizers[idx])
             else:
-                # local = LocalUpdate(args = args, dataset = dataset_train, 
-                #                     idxs = dict_users[idx],
-                #                     loss_func = loss_func_val,
-                #                     optimizer_op = 'sgd')
                 local = LocalUpdate(args = args, dataset = dataset_train, 
                                     idxs = dict_users[idx],
                                     loss_func = loss_func_val,
@@ -414,13 +401,11 @@ if __name__ == '__main__':
                     val_loss, val_acc = test_med(args, model, dataset_test, loss_func_val, args.device)
                 else :
                     val_loss, val_acc = test_med(args, model, val_loaders[client_idx], loss_func_val, args.device)
-                
                 # MNIST ...
                 #     acc_train, loss_train = test_img_classification(net_glob, dataset_train, args, type = 'ce')
                 #     acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'ce')
                 #     print("Training accuracy: {:.2f}".format(acc_train))
                 #     print("Testing accuracy: {:.2f}".format(acc_test))
-
                 val_acc_list[client_idx] = val_acc
                 # print(' Site-{:<10s}| Val  Loss: {:.4f} | Val  Acc: {:.4f}'.format(datasets[client_idx], val_loss, val_acc))
                 print(' Site :', client_idx)
