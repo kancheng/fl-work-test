@@ -214,11 +214,18 @@ if __name__ == '__main__':
 
     # PATH
     args.save_path = './save_model/checkpoint/{}/seed{}'.format(args.dataset, seed)
-    exp_folder = 'HarmoFL_exp'
-    args.save_path = os.path.join(args.save_path, exp_folder)
-    if not os.path.exists(args.save_path):
-        os.makedirs(args.save_path)
-    SAVE_PATH = os.path.join(args.save_path, 'HarmoFL')
+    if args.methods == 'fedavg':
+        exp_folder = 'FedAvg_exp'
+        args.save_path = os.path.join(args.save_path, exp_folder)
+        if not os.path.exists(args.save_path):
+            os.makedirs(args.save_path)
+        SAVE_PATH = os.path.join(args.save_path, 'FedAvg')
+    elif args.methods == 'harmofl':
+        exp_folder = 'HarmoFL_exp'
+        args.save_path = os.path.join(args.save_path, exp_folder)
+        if not os.path.exists(args.save_path):
+            os.makedirs(args.save_path)
+        SAVE_PATH = os.path.join(args.save_path, 'HarmoFL')
 
     print('# Deive:', args.device)
     print('# Training Clients:{}'.format(args.dataset))
@@ -229,7 +236,10 @@ if __name__ == '__main__':
         log_path = args.save_path.replace('checkpoint', 'log')
         if not os.path.exists(log_path):
             os.makedirs(log_path)
-        logfile = open(os.path.join(log_path,'HarmoFL.log'), 'a')
+        if args.methods == 'fedavg':
+            logfile = open(os.path.join(log_path,'FedAvg.log'), 'a')
+        elif args.methods == 'harmofl':
+            logfile = open(os.path.join(log_path,'HarmoFL.log'), 'a')
         logfile.write('==={}===\n'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
         logfile.write('===Setting===\n')
         for k in list(vars(args).keys()):
@@ -290,7 +300,6 @@ if __name__ == '__main__':
         print("Aggregation over all clients")
         models = [net_glob for i in range(args.num_users)]
         print('INFO. : All clients - ', len(models))
-    
     # Mes
     if args.methods == 'fedavg':
         print('INFO. : Methods - FedAvg')
@@ -298,7 +307,6 @@ if __name__ == '__main__':
         print('INFO. : Methods - HarmoFL')
     elif args.methods == 'feddc':
         print('INFO. : Methods - FedDC')
-
     if args.resume:
         checkpoint = torch.load(SAVE_PATH+'_latest', map_location=args.device)
         net_glob.load_state_dict(checkpoint['server_model'])
@@ -327,11 +335,9 @@ if __name__ == '__main__':
         if not args.all_clients:
             models = []
         # models = []
-
         m = max(int(args.frac * args.num_users), 1)
         idxs_users = np.random.choice(range(args.num_users), m, replace=False)
         for idx in idxs_users:
-
             try:
                 params = models[idx].parameters()
             except IndexError:
