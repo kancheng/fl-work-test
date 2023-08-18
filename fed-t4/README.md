@@ -224,7 +224,7 @@ python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1
 
 python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1 --gpu 0 --method harmofl --all_clients
 
-# CAMELYON17 DenseNet FEDAVG HARMOFL
+# CAMELYON17 DENSENET FEDAVG HARMOFL
 python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 1 --epochs 1
 
 python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 128 --epochs 1
@@ -235,9 +235,142 @@ python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 1 --epochs 1 --method
 
 python main_fed.py --dataset camelyon17 --gpu 0 --local_bs 1 --epochs 1 --method harmofl --all_clients
 
+# PROSTATE UNET FEDAVG HARMOFL
+python main_fed.py --dataset prostate --gpu 0 --local_bs 1 --epochs 1
 
+python main_fed.py --dataset prostate --gpu 0 --local_bs 128 --epochs 1
 
+python main_fed.py --dataset prostate --gpu 0 --local_bs 1 --epochs 1 --all_clients
 
+python main_fed.py --dataset prostate --gpu 0 --local_bs 1 --epochs 1 --method harmofl
+
+python main_fed.py --dataset prostate --gpu 0 --local_bs 1 --epochs 1 --method harmofl --all_clients
+
+# FETS2022 UNET FEDAVG HARMOFL
+python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 1 --epochs 1
+
+python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 128 --epochs 1
+
+python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 1 --epochs 1 --all_clients
+
+python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 1 --epochs 1 --method harmofl
+
+python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 1 --epochs 1 --method harmofl --all_clients
 
 ```
 
+## Fed Test. Not GPU
+
+```
+# MNIST CNN MLP FEDAVG HARMOFL
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 1 --methods harmofl
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 1 --methods harmofl --all_clients
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 1
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model cnn --epochs 1 --all_clients
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 1 --methods harmofl
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 1 --methods harmofl --all_clients
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 1
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model mlp --epochs 1 --all_clients
+
+# MNIST NN FEDAVG HARMOFL
+python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 1 
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 1 --all_clients
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 1 --methods harmofl 
+
+python main_fed.py --dataset mnist --iid --num_channels 1 --model 2nn --epochs 1 --methods harmofl --all_clients
+
+# CIFAR10 CNN MLP FEDAVG HARMOFL
+python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 1
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 1 --all_clients
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 1 --methods harmofl 
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model cnn --epochs 1 --methods harmofl --all_clients
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 1
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 1 --all_clients
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 1 --methods harmofl 
+
+python main_fed.py --dataset cifar --iid --num_channels 3 --model mlp --epochs 1 --methods harmofl --all_clients
+
+# CIFAR100 CNN MLP FEDAVG HARMOFL
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 1 --num_classes 100
+
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 1 --num_classes 100 --all_clients
+
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 1 --num_classes 100 --methods harmofl 
+
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model cnn --epochs 1 --num_classes 100 --methods harmofl --all_clients
+
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 1 --num_classes 100
+
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 1 --num_classes 100 --all_clients
+
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 1 --num_classes 100 --methods harmofl 
+
+python main_fed.py --dataset cifar100 --iid --num_channels 3 --model mlp --epochs 1 --num_classes 100 --methods harmofl --all_clients
+
+# EMNIST NN FEDAVG HARMOFL
+python main_fed.py --dataset emnist --iid --num_channels 1 --model nn --epochs 1
+
+python main_fed.py --dataset emnist --iid --num_channels 1 --model nn --epochs 1 --all_clients
+
+python main_fed.py --dataset emnist --iid --num_channels 1 --model nn --epochs 1 --methods harmofl
+
+python main_fed.py --dataset emnist --iid --num_channels 1 --model nn --epochs 1 --methods harmofl --all_clients
+
+# SALT UNET FEDAVG HARMOFL
+python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1
+
+python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1 --all_clients
+
+python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1 --method harmofl
+
+python main_fed.py --dataset salt --iid --num_channels 1 --model unet --epochs 1 --method harmofl --all_clients
+
+# CAMELYON17 DENSENET FEDAVG HARMOFL
+python main_fed.py --dataset camelyon17 --local_bs 1 --epochs 1
+
+python main_fed.py --dataset camelyon17 --local_bs 128 --epochs 1
+
+python main_fed.py --dataset camelyon17 --local_bs 1 --epochs 1 --all_clients
+
+python main_fed.py --dataset camelyon17 --local_bs 1 --epochs 1 --method harmofl
+
+python main_fed.py --dataset camelyon17 --local_bs 1 --epochs 1 --method harmofl --all_clients
+
+# PROSTATE UNET FEDAVG HARMOFL
+python main_fed.py --dataset prostate --local_bs 1 --epochs 1
+
+python main_fed.py --dataset prostate --local_bs 128 --epochs 1
+
+python main_fed.py --dataset prostate --local_bs 1 --epochs 1 --all_clients
+
+python main_fed.py --dataset prostate --local_bs 1 --epochs 1 --method harmofl
+
+python main_fed.py --dataset prostate --local_bs 1 --epochs 1 --method harmofl --all_
+
+# FETS2022 UNET FEDAVG HARMOFL
+python main_fed.py --dataset brainfets2022 --local_bs 1 --epochs 1
+
+python main_fed.py --dataset brainfets2022 --local_bs 128 --epochs 1
+
+python main_fed.py --dataset brainfets2022 --local_bs 1 --epochs 1 --all_clients
+
+python main_fed.py --dataset brainfets2022 --local_bs 1 --epochs 1 --method harmofl
+
+python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 1 --epochs 1 --method harmofl --all_
+
+```
