@@ -102,6 +102,7 @@ class LocalUpdate(object):
                 if hasattr(self.optimizer, 'generate_delta') and callable(self.optimizer.generate_delta):
                     self.optimizer.generate_delta(zero_grad=True)
                 self.optimizer.step()
+                # 與結果無關, 只顯示訊息。
                 if self.args.verbose and batch_idx % 10 == 0:
                     print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         iter, batch_idx * len(images), len(self.ldr_train.dataset),

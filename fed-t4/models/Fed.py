@@ -13,6 +13,7 @@ def FedAvg(models):
     w_avg = copy.deepcopy(models[0].state_dict())
     for k in w_avg.keys():
         for i in range(1, len(models)):
+            # state_dict() 模型內的權重參數
             w_avg[k] += models[i].state_dict()[k]
         w_avg[k] = torch.div(w_avg[k], len(models))
     return w_avg

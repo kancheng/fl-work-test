@@ -360,7 +360,7 @@ python main_fed.py --dataset prostate --local_bs 1 --epochs 1 --all_clients
 
 python main_fed.py --dataset prostate --local_bs 1 --epochs 1 --method harmofl
 
-python main_fed.py --dataset prostate --local_bs 1 --epochs 1 --method harmofl --all_
+python main_fed.py --dataset prostate --local_bs 1 --epochs 1 --method harmofl --all_clients
 
 # FETS2022 UNET FEDAVG HARMOFL
 python main_fed.py --dataset brainfets2022 --local_bs 1 --epochs 1
@@ -371,6 +371,6 @@ python main_fed.py --dataset brainfets2022 --local_bs 1 --epochs 1 --all_clients
 
 python main_fed.py --dataset brainfets2022 --local_bs 1 --epochs 1 --method harmofl
 
-python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 1 --epochs 1 --method harmofl --all_
+python main_fed.py --dataset brainfets2022 --gpu 0 --local_bs 1 --epochs 1 --method harmofl --all_clients
 
 ```

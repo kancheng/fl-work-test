@@ -371,32 +371,52 @@ if __name__ == '__main__':
                                     optimizer = optimizers[idx])
             # 檢查 models 內有沒有初始化過
             if len(models)<idx:
+                # print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
                 model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                # 1.執行了 train 方法，取得 model 變數
+                # 2.將 model 變數傳進 models 內
                 if args.all_clients:
+                    # print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC')
                     models[idx] = copy.deepcopy(model)
                     # print('INFO. - models[idx] : ', models[idx])
                     # print('INFO. - type(models) : ', type(models))
                     # print('INFO. - len(models) : ', len(models))
                 else:
+                    # print('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
                     models.append(copy.deepcopy(model))
                     # print('INFO. - models : ', models)
                     # print('INFO. - type(models) : ', type(models))
                     # print('INFO. - len(models) : ', len(models))
             else:
+                # print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD')
                 model, loss = local.train(net=models[idx].to(args.device))
+                # models 需要更新, 但這裡用 append 會出錯。
+                # models.append(copy.deepcopy(model))
+                models[idx] = copy.deepcopy(model)
+            # print('AAAA1', loss)
             # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))
+            # print('AAAA222', len(loss_locals))
+            # print('AAAA222', loss_locals)
         # update global weights
+        # 该计算不会在反向传播中被记录, 不會去改任何權重。
+        # with torch.no_grad()或者@torch.no_grad()中的数据不需要计算梯度，也不会进行反向传播
         with torch.no_grad():
             if args.methods == 'fedavg':
+                # 參數讀出來, 才做更新。
                 w_glob = FedAvg(models)
+                # net_glob 全域模型, 更新 w 參數
                 net_glob.load_state_dict(w_glob)
             elif args.methods == 'harmofl':
+                # 
                 net_glob, models = HarmoFL(net_glob, models, client_weights)
             # print loss
             loss_val_acc_listavg = sum(loss_locals) / len(loss_locals)
+            # print('XXXXX1', len(loss_locals))
             print('Round {:3d}, Average loss {:.3f}'.format(iter +1, loss_val_acc_listavg))
+            # print('XXXXX2', len(loss_train))
             loss_train.append(loss_val_acc_listavg)
+            # print('XXXXX3', len(loss_train))
 
             val_acc_list = [None for j in range(len(models))]
             print('============== Global Validation ==============')
