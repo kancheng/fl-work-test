@@ -62,22 +62,39 @@ def test_med(args, model, data_loader, loss_fun, device):
     with torch.no_grad():
         for step, (data, target) in enumerate(data_loader):
             data = data.to(args.device)
+            
             target = target.to(args.device)
+            # output 模型的結果
             output = model(data)
+            # print('output',output)
             loss = loss_fun(output, target)
             loss_all += loss.item()
-
+            # print('loss_all',loss_all)
             if segmentation:
                 test_acc += DiceLoss().dice_coef(output, target).item()
             else:
                 total += target.size(0)
                 pred = output.data.max(1)[1]
+                pred = output.data.max(0)[0]
+                # torch.max()这个函数返回的是两个值，第一个值是具体的value（我们用下划线_表示），第二个值是value所在的index（也就是predicted）。
+                # https://pytorch.org/docs/stable/generated/torch.max.html
+                # print('CCCCCCCCCCCCCCCCCCCC', pred)
                 batch_correct = pred.eq(target.view(-1)).sum().item()
+                # 而 torch.eq() 函数就是用来比较对应位置数字，相同则为1，否则为0，输出与那两个tensor大小相同，并且其中只有1和0。
+                # https://pytorch.org/docs/stable/generated/torch.eq.html
+                # torch.eq().sum()就是将所有值相加，但得到的仍是tensor.
+                # torch.eq().sum()得到的结果就是[2]。
+                # torch.eq().sum().item()得到值2。
+                # Pytorch 中的 view 函数作用是将张量铺平，
+                # print('batch_correct',batch_correct)
                 correct += batch_correct
+                # print('correct += batch_correct',batch_correct)
+                # print('target.size(0)',target.size(0))
                 if step % math.ceil(len(data_loader)*0.2) == 0:
                     print(' [Step-{}|{}]| Test Acc: {:.4f}'.format(step, len(data_loader), batch_correct/target.size(0)), end='\r')
 
     loss = loss_all / len(data_loader)
+    # print('loss = loss_all / len(data_loader)',loss)
     acc = test_acc/ len(data_loader) if segmentation else correct/total
     return loss, acc
 

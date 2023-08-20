@@ -99,6 +99,7 @@ class LocalUpdate(object):
                 # loss = nn.BCEWithLogitsLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 # loss = nn.CrossEntropyLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 loss.backward()
+                # print(loss)
                 if hasattr(self.optimizer, 'generate_delta') and callable(self.optimizer.generate_delta):
                     self.optimizer.generate_delta(zero_grad=True)
                 self.optimizer.step()
