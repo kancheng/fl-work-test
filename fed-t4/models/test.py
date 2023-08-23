@@ -59,7 +59,6 @@ def cal_iou(outputs, labels, SMOOTH=1e-6):
         # thresholded = torch.clamp(20 * (iou - 0.5), 0, 10).ceil() / 10  # This is equal to comparing with thresolds
     
     return iou
-
     # return iou.cpu().detach().numpy()
 
 def get_iou_score(outputs, labels):

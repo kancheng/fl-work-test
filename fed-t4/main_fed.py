@@ -184,7 +184,6 @@ if __name__ == '__main__':
         client_num = args.num_users
         client_weights = [1./client_num for i in range(client_num)]
 
-        # exit('該功能正在測試中 ...')
     elif args.dataset == 'prostate':
         args.model = 'hfl'
         print('Prostate MRI Loading ...')
@@ -192,7 +191,7 @@ if __name__ == '__main__':
         net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_prostate(args)
         args.num_users = len(init_dataset)
         client_num = args.num_users
-        # exit('該功能正在測試中 ...')
+
     elif args.dataset == 'brainfets2022':
         args.model = 'hfl'
         print('FeTS2022 (brain) Loading ...')
@@ -200,7 +199,6 @@ if __name__ == '__main__':
         net_glob, loss_func_val, init_dataset, _1, _2, train_loaders, val_loaders, test_loaders = initialize_brain_fets(args)
         args.num_users = len(init_dataset)
         client_num = args.num_users
-        # exit('該功能正在測試中 ...')
     else:
         exit('Error: unrecognized dataset')
     # Seed
@@ -317,7 +315,7 @@ if __name__ == '__main__':
         if 'optim_0' in list(checkpoint.keys()):
             for client_idx in range(client_num):
                 net_glob[client_idx].load_state_dict(checkpoint[f'optim_{client_idx}'])
-        #for client_idx in range(client_num):
+        # for client_idx in range(client_num):
            # models[client_idx].to('cpu')
 
         best_epoch, best_acc  = checkpoint['best_epoch'], checkpoint['best_acc']
