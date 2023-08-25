@@ -111,3 +111,57 @@ class LocalUpdate(object):
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))
         return net, sum(epoch_loss) / len(epoch_loss)
+
+
+class LocalUpdateFEDDC(LocalUpdate):
+    @property
+    def model_parameters(self) -> torch.Tensor:
+        """Return model parameters in dimension one tensor."""
+        # return torch.cat([param.data.view(-1) for param in self._model.parameters()])
+
+        parameters = []
+        for name, param in self._model.state_dict().items():
+            parameters.append(param.data.view(-1))
+
+        # Concatenate all the flattened parameters into a single tensor
+        return torch.cat(parameters)
+    
+    def train(self, net):
+        super().train()
+        net.train()
+        # train and update
+        if self.optimizer is None:
+            self.optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
+        epoch_loss = []
+        for iter in range(self.args.local_ep):
+            batch_loss = []
+            for batch_idx, (images, labels) in enumerate(self.ldr_train):
+                images, labels = images.to(self.args.device), labels.to(self.args.device)
+                net.zero_grad()
+                log_probs = net(images)
+                if log_probs.shape[0] != labels.shape[0]:
+                    raise ValueError("Number of outputs and labels don't match.")
+                # Loss
+                
+                # l2 = torch.sum(torch.pow(self.model_parameters + self.H[id] - freezed_model, 2))
+                # l3 = torch.dot(self.model_parameters, -self.g[id] + global_g)
+                # loss = l1 + 0.5 * self.alpha * l2 + 1.0 * l3 / self.lr / self.epochs
+                # loss_list.append(loss.item())
+
+                # self.criterion = torch.nn.CrossEntropyLoss()
+                l1 = self.loss_func(log_probs, labels)
+                l2 = torch.sum(torch.pow(self.model_parameters + self.H[id] - freezed_model, 2))
+                l3 = torch.dot(self.model_parameters, -self.g[id] + global_g)
+                loss = l1 + 0.5 * self.alpha * l2 + 1.0 * l3 / self.lr / self.epochs
+                loss.backward()
+                if hasattr(self.optimizer, 'generate_delta') and callable(self.optimizer.generate_delta):
+                    self.optimizer.generate_delta(zero_grad=True)
+                self.optimizer.step()
+                # 與結果無關, 只顯示訊息。
+                if self.args.verbose and batch_idx % 10 == 0:
+                    print('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                        iter, batch_idx * len(images), len(self.ldr_train.dataset),
+                            100. * batch_idx / len(self.ldr_train), loss.item()))
+                batch_loss.append(loss.item())
+            epoch_loss.append(sum(batch_loss)/len(batch_loss))
+        return net, sum(epoch_loss) / len(epoch_loss)

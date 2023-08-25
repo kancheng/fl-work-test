@@ -40,10 +40,44 @@ def HarmoFL(server_model, models, client_weights):
     return server_model, models
 
 # methods 'feddc'
-
 def FedDC(models):
-    w_avg = 12
+    w_avg = copy.deepcopy(models[0].state_dict())
+    for k in w_avg.keys():
+        for i in range(1, len(models)):
+            # state_dict() 模型內的權重參數
+            w_avg[k] += models[i].state_dict()[k]
+        w_avg[k] = torch.div(w_avg[k], len(models))
     return w_avg
+
+#             self.global_g = 1.0 * \
+#                 ((1.0 * self.num_clients * self.global_g) +
+#                  sum(delta_g_list)) / self.num_clients
+
+# class FedDCServerHandler(FedAvgServerHandler):
+#     @property
+#     def downlink_package(self):
+#         return [self.model_parameters, self.global_g]
+
+#     def setup_optim(self):
+#         self.global_g = torch.zeros_like(self.model_parameters)
+#         # self.g_list = [torch.zeros_like(self.model_parameters)]*self.num_clients
+
+#     def global_update(self, buffer):
+#         assert len(buffer) > 0
+#         self.client_buffer = deepcopy(buffer)
+#         assert len(self.client_buffer) <= self.num_clients_per_round
+#         if len(self.client_buffer) == self.num_clients_per_round:
+#             # unpack
+#             parameter_list = [ele[0] for ele in buffer]
+#             h_list = [ele[1] for ele in buffer]
+#             delta_g_list = [ele[2] for ele in buffer]
+#             self.global_g = 1.0 * \
+#                 ((1.0 * self.num_clients * self.global_g) +
+#                  sum(delta_g_list)) / self.num_clients
+#             # print("global_g",self.global_g)
+#             next_model = fedavg_aggregate(parameter_list + h_list)
+#             self.set_model(next_model)
+
 
 # def FedXX(x):
 #     x = x + 1

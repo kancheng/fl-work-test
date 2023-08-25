@@ -327,7 +327,7 @@ if __name__ == '__main__':
         best_epoch = 0
         best_acc = [0. for j in range(client_num)]
         start_iter = 0
-
+    # prepare training.
     for iter in range( start_iter, args.epochs):
         loss_locals = []
         if not args.all_clients:
@@ -343,7 +343,7 @@ if __name__ == '__main__':
                 params = models[idx].parameters()
             except IndexError:
                 params = net_glob.parameters()
-
+            # choosing optimizers ...
             if args.dataset == 'prostate':
                 optimizers = [WPOptim(params, base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
             elif args.dataset == 'brain':
@@ -353,6 +353,8 @@ if __name__ == '__main__':
                 optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
             else :
                 optimizers = [torch.optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum) for idx in range(client_num)]
+            
+            # training ; base on dataset ...
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
                 dataset_train = _1[idx]
                 local = LocalUpdate(args = args, dataset = dataset_train, 
@@ -407,6 +409,9 @@ if __name__ == '__main__':
                 net_glob.load_state_dict(w_glob)
             elif args.methods == 'harmofl':
                 net_glob, models = HarmoFL(net_glob, models, client_weights)
+            elif args.methods == 'feddc':
+                print('test')
+                exit()
             # print loss
             loss_val_acc_listavg = sum(loss_locals) / len(loss_locals)
             print('Round {:3d}, Average loss {:.3f}'.format(iter +1, loss_val_acc_listavg))
