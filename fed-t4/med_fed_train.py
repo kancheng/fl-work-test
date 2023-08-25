@@ -20,9 +20,8 @@ def train_perturbation(args, model, data_loader, optimizer, loss_fun, device):
 
     for step, (data, target) in enumerate(data_loader):
         optimizer.zero_grad()
-
-        #data = data.to(device)
-        #target = target.to(device)
+        # data = data.to(device)
+        # target = target.to(device)
         output = model(data)
         loss = loss_fun(output, target)
         loss_all += loss.item()
@@ -78,7 +77,7 @@ def test_med(args, model, data_loader, loss_fun, device):
                 pred = output.data.max(0)[0]
                 # torch.max()这个函数返回的是两个值，第一个值是具体的value（我们用下划线_表示），第二个值是value所在的index（也就是predicted）。
                 # https://pytorch.org/docs/stable/generated/torch.max.html
-                # print('CCCCCCCCCCCCCCCCCCCC', pred)
+                # print('pred', pred)
                 batch_correct = pred.eq(target.view(-1)).sum().item()
                 # 而 torch.eq() 函数就是用来比较对应位置数字，相同则为1，否则为0，输出与那两个tensor大小相同，并且其中只有1和0。
                 # https://pytorch.org/docs/stable/generated/torch.eq.html
