@@ -3,6 +3,15 @@ import torch
 class WPOptim(torch.optim.Optimizer):
     def __init__(self, params, base_optimizer, alpha=0.05, **kwargs):
         defaults = dict(alpha=alpha, **kwargs)
+        ########################
+        # COPY T7
+        # def update_old_init(self, global_model_params):
+        #     param_groups = list(global_model_params)
+        #     if len(param_groups) == 0:
+        #         raise ValueError("optimizer got an empty parameter list")
+        #     if not isinstance(param_groups[0], dict):
+        #         param_groups = [{'params': param_groups}]
+        ##################
         super(WPOptim, self).__init__(params, defaults)
         self.base_optimizer = base_optimizer(self.param_groups, **kwargs)
         self.param_groups = self.base_optimizer.param_groups

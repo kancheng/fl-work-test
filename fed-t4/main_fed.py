@@ -209,7 +209,6 @@ if __name__ == '__main__':
     random.seed(seed)
     cudnn.benchmark = False
     cudnn.deterministic = True
-
     # PATH
     args.save_path = './save_model/checkpoint/{}/seed{}'.format(args.dataset, seed)
     if args.methods == 'fedavg':
@@ -224,12 +223,9 @@ if __name__ == '__main__':
         if not os.path.exists(args.save_path):
             os.makedirs(args.save_path)
         SAVE_PATH = os.path.join(args.save_path, 'HarmoFL')
-
     print('# Deive:', args.device)
     print('# Training Clients:{}'.format(args.dataset))
-
     log = args.log
-
     if log:
         log_path = args.save_path.replace('checkpoint', 'log')
         if not os.path.exists(log_path):
@@ -242,16 +238,15 @@ if __name__ == '__main__':
         logfile.write('===Setting===\n')
         for k in list(vars(args).keys()):
             logfile.write('{}: {}\n'.format(k, vars(args)[k]))
-
     # federated client number
     client_num = args.num_users
+    # print('client_num',client_num)
     client_weights = [1./client_num for i in range(client_num)]
-
     # if args.dataset == 'salt' or args.dataset == 'medicalmnist':
     #     train_features, train_labels = next(iter(dataset_train))
     if args.model == 'mlp':
         img_size = dataset_train[0][0].shape
-    
+
     # build model
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = CNNCifar(args=args).to(args.device)
@@ -282,10 +277,8 @@ if __name__ == '__main__':
         exit('Error: unrecognized model')
     print(net_glob)
     net_glob.train()
-
     # copy weights
     w_glob = net_glob.state_dict()
-
     # training
     loss_train = []
     cv_loss, cv_acc = [], []
@@ -293,12 +286,19 @@ if __name__ == '__main__':
     net_best = None
     best_loss = None
     val_acc_list, net_list = [], []
-    
+    # 已知
+    # 1. Model 都有 parameters 方法
+    # 2. 正常情況下 model 使用該方法不會有問題
+    # 猜測問題：出在 model 變數初始化時有問題
+    # 因此: 比對HFL與t4的初始化差別
+    # models init ...
+    # HFL 的預設作法就是 all_clients
     if args.all_clients: 
         print("Aggregation over all clients")
-        models = [net_glob for i in range(args.num_users)]
+        # models = [net_glob for i in range(args.num_users)]
+        models = [copy.deepcopy(net_glob) for i in range(args.num_users)]
         print('INFO. : All clients - ', len(models))
-    # Mes
+    # Mes.
     if args.methods == 'fedavg':
         print('INFO. : Methods - FedAvg')
     elif args.methods == 'harmofl':
@@ -332,9 +332,12 @@ if __name__ == '__main__':
         loss_locals = []
         if not args.all_clients:
             models = []
+        # HFL
+        # models = [copy.deepcopy(server_model) for idx in range(client_num)]
         # models = []
         m = max(int(args.frac * args.num_users), 1)
         idxs_users = np.random.choice(range(args.num_users), m, replace=False)
+        # print('idxs_users',idxs_users)
         for idx in idxs_users:
             try:
                 params = models[idx].parameters()
@@ -346,7 +349,8 @@ if __name__ == '__main__':
             elif args.dataset == 'brain':
                 optimizers = [WPOptim(params, base_optimizer=optim.Adam, lr=args.lr, alpha=args.alpha, weight_decay=1e-4) for idx in range(client_num)]
             elif args.dataset == 'camelyon17':
-                optimizers = [WPOptim(params, base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
+                # models[idx].parameters()
+                optimizers = [WPOptim(params=models[idx].parameters(), base_optimizer=optim.SGD, lr=args.lr, alpha=args.alpha, momentum=0.9, weight_decay=1e-4) for idx in range(client_num)]
             else :
                 optimizers = [torch.optim.SGD(net_glob.parameters(), lr=args.lr, momentum=args.momentum) for idx in range(client_num)]
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
@@ -394,7 +398,7 @@ if __name__ == '__main__':
             loss_locals.append(copy.deepcopy(loss))
         # update global weights
         # 该计算不会在反向传播中被记录, 不會去改任何權重。
-        # with torch.no_grad()或者@torch.no_grad()中的数据不需要计算梯度，也不会进行反向传播
+        # with torch.no_grad() 或者 @torch.no_grad() 中的数据不需要计算梯度，也不会进行反向传播
         with torch.no_grad():
             if args.methods == 'fedavg':
                 # 參數讀出來, 才做更新。
@@ -427,7 +431,6 @@ if __name__ == '__main__':
                     # logfile.write(' Site: \n', datasets[client_idx])
                     logfile.write(' Val Loss:'+ str(val_loss))
                     logfile.write(' Val Acc:'+ str(val_acc))
-                    
                     logfile.flush()
             # Test after each round
             print('============== Test ==============')

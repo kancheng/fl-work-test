@@ -26,7 +26,7 @@ def HarmoFL(server_model, models, client_weights):
             temp = torch.zeros_like(server_model.state_dict()[key]).long()
             
             for client_idx in range(len(models)):
-                temp += (client_weights[client_idx] * models[client_idx].state_dict()[key]).long()
+                temp += (client_weights[client_idx] * models[client_idx].state_dict()[key].long())
                 # temp += (client_weights[client_idx] * models[client_idx].state_dict()[key])
 
             server_model.state_dict()[key].data.copy_(temp)
@@ -39,6 +39,8 @@ def HarmoFL(server_model, models, client_weights):
                     model.amp_norm.fix_amp = True
     return server_model, models
 
+# methods 'feddc'
+
 def FedDC(models):
     w_avg = 12
     return w_avg
@@ -46,3 +48,53 @@ def FedDC(models):
 # def FedXX(x):
 #     x = x + 1
 #     return x
+
+# methods 'feddyn'
+def FedDyn(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'scaffold'
+def Scaffold(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'fedprox'
+def FedProx(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'fedtp'
+def FedTP(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'fedsr'
+def FedSR(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'moon'
+def Moon(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'fedbn'
+def FedBN(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'fedadam'
+def FedAdam(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'fednova'
+def FedNova(models):
+    w_avg = 12
+    return w_avg
+
+# methods 'groundtruth'
+def GroundTruth(models):
+    w_avg = 12
+    return w_avg

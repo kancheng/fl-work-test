@@ -107,9 +107,10 @@ def initialize_camelyon17(args):
     args.lr = 1e-3
     model = DenseNet(input_shape=[3,96,96]) # Dense121
     loss_fun = nn.CrossEntropyLoss()
-    # sites = ['1', '2', '3', '4', '5']
+    sites = ['1', '2', '3', '4', '5']
     # sites = ['1', '2', '3']
-    sites = ['1']
+    # sites = ['1', '2']
+    # sites = ['2']
     for site in sites:
         trainset = Camelyon17(site=site, split='train', transform=transforms.ToTensor())
         testset = Camelyon17(site=site, split='test', transform=transforms.ToTensor())
