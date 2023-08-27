@@ -133,6 +133,7 @@ class LocalUpdateFEDDC(LocalUpdate):
         if self.optimizer is None:
             self.optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
         epoch_loss = []
+        freezed_model = deepcopy(model_parameters)
         for iter in range(self.args.local_ep):
             batch_loss = []
             for batch_idx, (images, labels) in enumerate(self.ldr_train):

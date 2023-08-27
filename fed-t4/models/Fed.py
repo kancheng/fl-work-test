@@ -26,9 +26,11 @@ def HarmoFL(server_model, models, client_weights):
             temp = torch.zeros_like(server_model.state_dict()[key]).long()
             
             for client_idx in range(len(models)):
+                print('type client_weights[client_idx]', type(client_weights[client_idx]))
+                print('type models[client_idx].state_dict()[key].long()', type(models[client_idx].state_dict()[key].long()))
                 temp += (client_weights[client_idx] * models[client_idx].state_dict()[key].long())
                 # temp += (client_weights[client_idx] * models[client_idx].state_dict()[key])
-
+                exit()
             server_model.state_dict()[key].data.copy_(temp)
             for client_idx in range(len(models)):
                 models[client_idx].state_dict()[key].data.copy_(server_model.state_dict()[key])
