@@ -479,7 +479,7 @@ def train_model_FedDC(model, model_func, alpha, local_update_last, global_update
                     local_parameter = param.reshape(-1)
                 else:
                     local_parameter = torch.cat((local_parameter, param.reshape(-1)), 0)
-            
+            # Here H_i
             loss_cp = alpha/2 * torch.sum((local_parameter - (global_model_param - hist_i))*(local_parameter - (global_model_param - hist_i)))
             loss_cg = torch.sum(local_parameter * state_update_diff) 
             

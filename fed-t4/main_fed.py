@@ -209,6 +209,9 @@ if __name__ == '__main__':
     random.seed(seed)
     cudnn.benchmark = False
     cudnn.deterministic = True
+
+    best_changed = False
+
     # PATH
     args.save_path = './save_model/checkpoint/{}/seed{}'.format(args.dataset, seed)
     if args.methods == 'fedavg':
@@ -293,6 +296,8 @@ if __name__ == '__main__':
     # 因此: 比對HFL與t4的初始化差別
     # models init ...
     # HFL 的預設作法就是 all_clients
+    if not args.all_clients:
+        models = []
     if args.all_clients: 
         print("Aggregation over all clients")
         # models = [net_glob for i in range(args.num_users)]
@@ -330,8 +335,8 @@ if __name__ == '__main__':
     # prepare training.
     for iter in range( start_iter, args.epochs):
         loss_locals = []
-        if not args.all_clients:
-            models = []
+        # if not args.all_clients:
+        #     models = []
         # HFL
         # models = [copy.deepcopy(server_model) for idx in range(client_num)]
         # models = []
@@ -394,7 +399,8 @@ if __name__ == '__main__':
                 # print(len(models))
                 # models 需要更新, 但這裡用 append 會出錯。
                 # models.append(copy.deepcopy(model))
-                #exit()
+                # exit()
+                print(type(models[idx]))
                 models[idx] = copy.deepcopy(model)
             # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))

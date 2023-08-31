@@ -11,7 +11,7 @@ class WPOptim(torch.optim.Optimizer):
         #         raise ValueError("optimizer got an empty parameter list")
         #     if not isinstance(param_groups[0], dict):
         #         param_groups = [{'params': param_groups}]
-        ##################
+        ########################
         super(WPOptim, self).__init__(params, defaults)
         self.base_optimizer = base_optimizer(self.param_groups, **kwargs)
         self.param_groups = self.base_optimizer.param_groups

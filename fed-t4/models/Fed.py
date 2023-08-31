@@ -24,10 +24,15 @@ def HarmoFL(server_model, models, client_weights):
         for key in server_model.state_dict().keys():
             # temp = torch.zeros_like(server_model.state_dict()[key])
             temp = torch.zeros_like(server_model.state_dict()[key]).long()
-            
+            print(temp)
+            print(models)
             for client_idx in range(len(models)):
-                print('type client_weights[client_idx]', type(client_weights[client_idx]))
-                print('type models[client_idx].state_dict()[key].long()', type(models[client_idx].state_dict()[key].long()))
+                # print('type client_weights[client_idx]', type(client_weights[client_idx]))
+                print('models[client_idx]', models[client_idx])
+                print('type models[client_idx]', type(models[client_idx]))
+                print('type client_idx', type(client_idx))
+                print('client_idx', client_idx)
+                print('type models[client_idx]', type(client_idx))
                 temp += (client_weights[client_idx] * models[client_idx].state_dict()[key].long())
                 # temp += (client_weights[client_idx] * models[client_idx].state_dict()[key])
                 exit()
@@ -42,6 +47,7 @@ def HarmoFL(server_model, models, client_weights):
     return server_model, models
 
 # methods 'feddc'
+# Server!??? 
 def FedDC(models):
     w_avg = copy.deepcopy(models[0].state_dict())
     for k in w_avg.keys():

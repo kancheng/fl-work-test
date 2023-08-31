@@ -7,12 +7,6 @@ from med_fed_train import *
 from utils.loss import *
 from utils.dataset import *
 
-# 引入 time 模組
-import time
-# 開始測量
-s_start = time.time()
-print('開始測時 : ')
-
 if __name__ == '__main__':
     # parse args
     args = args_parser()
@@ -146,12 +140,12 @@ if __name__ == '__main__':
         # federated client number
         client_num = args.num_users
         client_weights = [1./client_num for i in range(client_num)]
-        # print(net_glob)
-        # print(loss_func_val)
-        # print(init_dataset)
-        # print(train_loaders)
-        # print(val_loaders)
-        # print(test_loaders)
+        print(net_glob)
+        print(loss_func_val)
+        print(init_dataset)
+        print(train_loaders)
+        print(val_loaders)
+        print(test_loaders)
         # exit('該功能正在測試中 ...')
     elif args.dataset == 'prostate':
         args.model = 'hfl'
@@ -191,7 +185,7 @@ if __name__ == '__main__':
     # federated client number
     client_num = args.num_users
     client_weights = [1./client_num for i in range(client_num)]
-
+    
     # if args.dataset == 'salt' or args.dataset == 'medicalmnist':
     #     train_features, train_labels = next(iter(dataset_train))
     if args.model == 'mlp':
@@ -244,77 +238,62 @@ if __name__ == '__main__':
     
     if args.all_clients: 
         print("Aggregation over all clients")
-        models = [net_glob for i in range(args.num_users)]
-        print('INFO. : All clients - ', len(models))
+        w_locals = [w_glob for i in range(args.num_users)]
+    # Mutli. Fed.    
     
-    # Mes
-    if args.methods == 'fedavg':
-        print('INFO. : Methods - FedAvg')
-    elif args.methods == 'harmofl':
-        print('INFO. : Methods - HarmoFL')
-    elif args.methods == 'feddc':
-        print('INFO. : Methods - FedDC')
-
     for iter in range(args.epochs):
         loss_locals = []
         if not args.all_clients:
             models = []
-        # models = []
         m = max(int(args.frac * args.num_users), 1)
         idxs_users = np.random.choice(range(args.num_users), m, replace=False)
         for idx in idxs_users:
             if args.dataset == 'camelyon17' or args.dataset == 'prostate' or args.dataset == 'brainfets2022' :
-                dataset_train = _1[idx]
-                local = LocalUpdate(args = args, dataset = dataset_train, 
-                                    idxs = None,
-                                    loss_func = loss_func_val, 
-                                    lu_loader = train_loaders[idx],
-                                    optimizer_op = 'sgd')
-            elif args.model == 'unet' and args.dataset == 'salt':
-                loss_func_val = nn.BCEWithLogitsLoss()
-                local = LocalUpdate(args = args, dataset = dataset_train, 
-                                idxs = dict_users[idx],
-                                loss_func = loss_func_val,
-                                optimizer_op = 'adam')
+                local = LocalUpdate(args=args, dataset= _1[idx], idxs=None,loss_func=loss_func_val, lu_loader = train_loaders[idx])
             else:
-                local = LocalUpdate(args = args, dataset = dataset_train, 
-                                    idxs = dict_users[idx],
-                                    loss_func = loss_func_val,
-                                    optimizer_op = 'sgd')
+                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx],loss_func=loss_func_val)
             model, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
             if args.all_clients:
                 models[idx] = copy.deepcopy(model)
-                # print('INFO. - models[idx] : ', models[idx])
-                # print('INFO. - type(models) : ', type(models))
-                # print('INFO. - len(models) : ', len(models))
             else:
                 models.append(copy.deepcopy(model))
-                # print('INFO. - models : ', models)
-                # print('INFO. - type(models) : ', type(models))
-                # print('INFO. - len(models) : ', len(models))
-            # models.append(copy.deepcopy(model))
             loss_locals.append(copy.deepcopy(loss))
         # update global weights
         if args.methods == 'fedavg':
             w_glob = FedAvg(models)
             net_glob.load_state_dict(w_glob)
         elif args.methods == 'harmofl':
-            net_glob, models = HarmoFL(net_glob, models, client_weights)
+            net_glob,models = HarmoFL(net_glob,models,client_weights)
+
+        # copy weight to net_glob
+        
         # print loss
         loss_avg = sum(loss_locals) / len(loss_locals)
         print('Round {:3d}, Average loss {:.3f}'.format(iter, loss_avg))
         loss_train.append(loss_avg)
+    # elif args.methods == 'harmofl':
     # elif args.methods == 'feddc':
+    #     print('Testing ...')
     # elif args.methods == 'feddyn':
+    #     print('Testing ...')
     # elif args.methods == 'scaffold':
+    #     print('Testing ...')
     # elif args.methods == 'fedprox':
+    #     print('Testing ...')
     # elif args.methods == 'fedtp':
+    #     print('Testing ...')
     # elif args.methods == 'fedsr':
+    #     print('Testing ...')
     # elif args.methods == 'moon':
+    #     print('Testing ...')
     # elif args.methods == 'fedbn':
+    #     print('Testing ...')
     # elif args.methods == 'fedadam':
+    #     print('Testing ...')
     # elif args.methods == 'fednova':
+    #     print('Testing ...')
     # elif args.methods == 'groundtruth':
+    #     print('Testing ...')
 
     # plot loss curve
     plt.figure()
@@ -335,9 +314,4 @@ if __name__ == '__main__':
         acc_test, loss_test = test_img_classification(net_glob, dataset_test, args, type = 'ce')
         print("Training accuracy: {:.2f}".format(acc_train))
         print("Testing accuracy: {:.2f}".format(acc_test))
-
-# 結束測量
-s_end = time.time()
-# 輸出結果
-print("執行時間 : %f 秒" % (s_end - s_start))
 

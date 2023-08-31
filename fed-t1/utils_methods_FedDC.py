@@ -131,15 +131,17 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
             # cur_cld_model.load_state_dict(copy.deepcopy(dict(init_model.named_parameters())))
             cld_mdl_param = get_mdl_params([cur_cld_model], n_par)[0]
         
-        else:            
+        else:
+            #cursor         
             cur_cld_model = model_func().to(device)
             cur_cld_model.load_state_dict(copy.deepcopy(dict(fed_cld.named_parameters())), strict=False)
             # cur_cld_model.load_state_dict(copy.deepcopy(dict(fed_cld.named_parameters())))
             cld_mdl_param = get_mdl_params([cur_cld_model], n_par)[0]
+            
         
-    
         for i in range(saved_itr+1, com_amount):
             inc_seed = 0
+            ##### iid 寫法, 有打散。
             while(True):
                 np.random.seed(i + rand_seed + inc_seed)
                 act_list    = np.random.uniform(size=n_clnt)
