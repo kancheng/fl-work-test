@@ -45,10 +45,13 @@ class DatasetSplit(Dataset):
     
 
 class LocalUpdate(object):
-    def __init__(self, args, dataset=None, idxs=None, loss_func = nn.CrossEntropyLoss(), lu_loader=None):
+    def __init__(self, args, dataset=None, idxs=None, 
+                 loss_func = nn.CrossEntropyLoss(), lu_loader=None,
+                 optimizer_op = 'sgd'):
         self.args = args
         self.loss_func = loss_func
         self.selected_clients = []
+        self.optimizer_op = optimizer_op
         # salt batch_size = 1
         # self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=self.args.local_bs, shuffle=True)
         # 分組後只要讀進來就好，就不用再拆了。所以 batch_size=1。
@@ -59,23 +62,24 @@ class LocalUpdate(object):
         #     self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=1)
         if idxs == None:
             if lu_loader==None :
-                self.ldr_train = DataLoader(dataset, batch_size=1)
+                self.ldr_train = DataLoader(dataset, batch_size = 1)
             else :
                 self.ldr_train = lu_loader
         else :
-            self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=1)
+            self.ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size = 1)
         # print(idxs)
         # print('ldr_train',len(self.ldr_train),self.ldr_train)
 
     def train(self, net):
         net.train()
         # train and update
-        # optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum, weight_decay = 1e-4)
-        if self.args.model == 'unet' and self.args.dataset == 'salt':
+        if self.optimizer_op == 'sgd' :
+            optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
+        elif self.optimizer_op == 'adam' :
             optimizer = torch.optim.Adam(net.parameters(), lr=self.args.lr)
-        # elif self.args.dataset == 'camelyon17':
-        #     optimizer = WPOptim(params=net.parameters(), base_optimizer=torch.optim.SGD, 
-        #                                   lr=self.args.lr, alpha=0.05, momentum=0.9, weight_decay=1e-4)
+        elif self.optimizer_op == 'wposgd' :
+            optimizer = WPOptim(params=net.parameters(), base_optimizer=torch.optim.SGD, 
+                    lr=self.args.lr, alpha=0.05, momentum=0.9, weight_decay=1e-4)
         else :
             optimizer = torch.optim.SGD(net.parameters(), lr=self.args.lr, momentum=self.args.momentum)
         epoch_loss = []
@@ -88,10 +92,7 @@ class LocalUpdate(object):
                 log_probs = net(images)
                 if log_probs.shape[0] != labels.shape[0]:
                     raise ValueError("Number of outputs and labels don't match.")
-                if self.args.model == 'unet' and self.args.dataset == 'salt':
-                    loss = nn.BCEWithLogitsLoss()(log_probs, labels)
-                else:
-                    loss = self.loss_func(log_probs, labels)
+                loss = self.loss_func(log_probs, labels)
                 # loss = nn.BCEWithLogitsLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 # loss = nn.CrossEntropyLoss()(log_probs.squeeze(1), labels.squeeze(1))
                 loss.backward()
